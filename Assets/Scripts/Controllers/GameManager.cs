@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
     public List<PowerUp> powerUps;
     public List<Player> players;
 
-    public List<Vector3> playerPoints;
+    public List<Vector2> playerPoints;
 
     public Action onInitDone = null;
     public Action<Player> onPlayerMoved = null;
@@ -83,7 +83,7 @@ public class GameManager : MonoBehaviour
         {
             int x = UnityEngine.Random.Range(0, FIELD_SIZE.x);
             int y = UnityEngine.Random.Range(0, FIELD_SIZE.y);
-            var pos = new Vector2Int(x, y);
+            var pos = new Vector2(x, y);
 
             if (blocks.Any(n => n.pos.Equals(pos)))
                 continue;
@@ -91,9 +91,7 @@ public class GameManager : MonoBehaviour
             if (bricks.Any(n => n.pos.Equals(pos)))
                 continue;
 
-            var pos3 = new Vector3(pos.x, 0, pos.y);
-
-            if (playerPoints.Any(n => Vector3.Distance(n, pos3) < 2))
+            if (playerPoints.Any(n => Vector3.Distance(n, pos) < 2))
                 continue;
 
             bricks.Add(new Brick(pos));
@@ -128,7 +126,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void MovePlayer(int id, Vector3 dir)
+    public void MovePlayer(int id, Vector2 dir)
     {
         var player = players.Find(n => n.id.Equals(id));
         var nextPos = player.pos + (dir * PLAYER_SPEED * Time.deltaTime);
@@ -138,17 +136,17 @@ public class GameManager : MonoBehaviour
             nextPos.y > FIELD_SIZE.y ||
             nextPos.y < 0)*/
 
+
+        
+        //Works for spheres
         foreach(var block in blocks)
         {
-            //if within horizontal
-            if(nextPos.x > block.pos3.x - 0.5f && nextPos.x < block.pos3.x + 0.5f )
-
-            if (Vector3.Distance(block.pos3, nextPos) < 0.98f)
+            if (Vector3.Distance(block.pos, nextPos) < 0.98f)
             {
-                nextPos = block.pos3 + Vector3.Normalize(nextPos - block.pos3) * 0.98f;
+                nextPos = block.pos + (nextPos - block.pos).normalized * 0.98f;
             }
         }
-
+        
         player.pos = nextPos;
         onPlayerMoved?.Invoke(player);
     }

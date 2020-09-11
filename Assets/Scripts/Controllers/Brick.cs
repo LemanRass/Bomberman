@@ -2,9 +2,9 @@
 
 public class Brick
 {
-    public Vector2Int pos;
+    public Vector2 pos;
 
-    public Brick(Vector2Int pos)
+    public Brick(Vector2 pos)
     {
         this.pos = pos;
     }

@@ -77,7 +77,7 @@ public class FieldView : MonoBehaviour
             int idx = playerData.isLocal ? 1 : 2;
             var prefab = Resources.Load<GameObject>($"Players/{idx}/Player_{idx}");
             var go = Instantiate<GameObject>(prefab, transform);
-            go.transform.localPosition = new Vector3(-playerData.pos.x, 0, playerData.pos.z);
+            go.transform.localPosition = new Vector3(-playerData.pos.x, 0, playerData.pos.y);
             var player = go.GetComponent<PlayerView>();
             player.Init(playerData);
             players.Add(player);

@@ -3,9 +3,9 @@
 public class PowerUp
 {
     public PowerUPType type;
-    public Vector2Int pos;
+    public Vector2 pos;
 
-    public PowerUp(PowerUPType type, Vector2Int pos)
+    public PowerUp(PowerUPType type, Vector2 pos)
     {
         this.type = type;
         this.pos = pos;
