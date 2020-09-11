@@ -15,8 +15,8 @@ public class FieldView : MonoBehaviour
     private void Init()
     {
         InitBlocks();
-        InitBricks();
-        InitPlane();
+        //InitBricks();
+        //InitPlane();
         InitPlayers();
 
         GameManager.instance.onInitDone -= Init;
@@ -40,7 +40,27 @@ public class FieldView : MonoBehaviour
     {
         blocks = new List<BlockView>();
 
-        foreach(var blockData in GameManager.instance.blocks)
+        for(int x = 0; x < GameManager.instance.field.GetLength(0); x++)
+        {
+            for(int y = 0; y < GameManager.instance.field.GetLength(1); y++)
+            {
+                var cell = GameManager.instance.field[x, y];
+
+                if (cell != null && cell.type == CellType.Block)
+                {
+                    var block = GameManager.instance.field[x, y].data as Block;
+                    var prefab = Resources.Load<GameObject>($"Blocks/1/Block_1");
+                    var go = Instantiate<GameObject>(prefab, transform);
+                    float posx = -(block.pos.x * go.transform.localScale.x);
+                    float posz = block.pos.y * go.transform.localScale.z;
+                    go.transform.localPosition = new Vector3(posx, 0, posz);
+                    var view = go.GetComponent<BlockView>();
+                    blocks.Add(view);
+                }
+            }
+        }
+
+        /*foreach(var blockData in GameManager.instance.blocks)
         {
             var prefab = Resources.Load<GameObject>($"Blocks/1/Block_1");
             var go = Instantiate<GameObject>(prefab, transform);
@@ -49,7 +69,7 @@ public class FieldView : MonoBehaviour
             go.transform.localPosition = new Vector3(x, 0, z);
             var block = go.GetComponent<BlockView>();
             blocks.Add(block);
-        }
+        }*/
     }
 
     private void InitBricks()

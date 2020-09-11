@@ -3,6 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public class Cell
+{
+    public CellType type;
+    public object data;
+}
+
+public enum CellType
+{
+    Empty,
+    Block,
+    Brick,
+    PowerUp,
+    Bomb
+}
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance { get; private set; }
@@ -13,6 +28,8 @@ public class GameManager : MonoBehaviour
     public int BRICKS_COUNT = 30;
     public int POWERUP_COUNT = 5;
     public float PLAYER_SPEED = 2.0f;
+
+    public Cell[,] field = new Cell[9, 9];
 
     public List<Block> blocks;
     public List<Brick> bricks;
@@ -32,14 +49,57 @@ public class GameManager : MonoBehaviour
 
     public void Init()
     {
-        InitBlocks();
+        InitBlocks2();
 
-        InitBricks();
+        //InitBricks();
 
-        InitPowerUps();
+        //InitPowerUps();
 
         InitPlayers();
     }
+
+    private void InitBlocks2()
+    {
+        for (int y = 0; y < field.GetLength(1); y++)
+        {
+            for (int x = 0; x < field.GetLength(0); x++)
+            {
+                if (y == 0 || y == field.GetLength(1) - 1)
+                {
+                    field[x, y] = new Cell()
+                    {
+                        type = CellType.Block,
+                        data = new Block(x, y)
+                    };
+                    continue;
+                }
+
+                if ((y % 2) != 0)
+                {
+                    if (x == 0 || x == field.GetLength(0) - 1)
+                    {
+                        field[x, y] = new Cell()
+                        {
+                            type = CellType.Block,
+                            data = new Block(x, y)
+                        };
+                    }
+                }
+                else
+                {
+                    if ((x % 2) == 0)
+                    {
+                        field[x, y] = new Cell()
+                        {
+                            type = CellType.Block,
+                            data = new Block(x, y)
+                        };
+                    }
+                }
+            }
+        }
+    }
+
 
     private void InitBlocks()
     {
@@ -91,7 +151,7 @@ public class GameManager : MonoBehaviour
             if (bricks.Any(n => n.pos.Equals(pos)))
                 continue;
 
-            if (playerPoints.Any(n => Vector3.Distance(n, pos) < 2))
+            if (playerPoints.Any(n => Vector2.Distance(n, pos) < 2))
                 continue;
 
             bricks.Add(new Brick(pos));
@@ -137,7 +197,23 @@ public class GameManager : MonoBehaviour
             nextPos.y < 0)*/
 
 
-        
+        for(int x = 0; x < field.GetLength(0); x++)
+        {
+            for(int y = 0; y < field.GetLength(1); y++)
+            {
+                if(field[x, y].type == CellType.Block)
+                {
+                    var block = field[x, y].data as Block;
+
+                    if (Vector3.Distance(block.pos, nextPos) < 0.98f)
+                    {
+                        nextPos = block.pos + (nextPos - block.pos).normalized * 0.98f;
+                    }
+                }
+            }
+        }
+
+        /*
         //Works for spheres
         foreach(var block in blocks)
         {
@@ -146,7 +222,8 @@ public class GameManager : MonoBehaviour
                 nextPos = block.pos + (nextPos - block.pos).normalized * 0.98f;
             }
         }
-        
+        */
+
         player.pos = nextPos;
         onPlayerMoved?.Invoke(player);
     }
