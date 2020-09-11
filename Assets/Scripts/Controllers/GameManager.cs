@@ -19,8 +19,6 @@ public class GameManager : MonoBehaviour
     public List<PowerUp> powerUps;
     public List<Player> players;
 
-    public List<Vector2> playerPoints;
-
     public Action onInitDone = null;
     public Action<Player> onPlayerMoved = null;
 
@@ -34,11 +32,12 @@ public class GameManager : MonoBehaviour
     {
         InitBlocks();
 
+        InitPlayers();
+
         InitBricks();
 
         InitPowerUps();
 
-        InitPlayers();
     }
 
     private void InitBlocks()
@@ -91,7 +90,7 @@ public class GameManager : MonoBehaviour
             if (bricks.Any(n => n.pos.Equals(pos)))
                 continue;
 
-            if (playerPoints.Any(n => Vector3.Distance(n, pos) < 2))
+            if (players.Any(n => Vector2.Distance(n.pos, pos) < 2))
                 continue;
 
             bricks.Add(new Brick(pos));
@@ -120,23 +119,16 @@ public class GameManager : MonoBehaviour
     {
         players = new List<Player>();
 
-        for(int i = 0; i < playerPoints.Count; i++)
-        {
-            players.Add(new Player(i, playerPoints[i], i == 0));
-        }
+        players.Add(new Player(1, new Vector2(1, 1), true));
+        players.Add(new Player(2, new Vector2(1, FIELD_SIZE.y - 2), false));
+        players.Add(new Player(3, new Vector2(FIELD_SIZE.x - 2, 1), false));
+        players.Add(new Player(4, new Vector2(FIELD_SIZE.x - 2, FIELD_SIZE.y - 2), false));
     }
 
     public void MovePlayer(int id, Vector2 dir)
     {
         var player = players.Find(n => n.id.Equals(id));
         var nextPos = player.pos + (dir * PLAYER_SPEED * Time.deltaTime);
-
-        /*if(nextPos.x > FIELD_SIZE.x ||
-            nextPos.x < 0 ||
-            nextPos.y > FIELD_SIZE.y ||
-            nextPos.y < 0)*/
-
-
         
         //Works for spheres
         foreach(var block in blocks)
