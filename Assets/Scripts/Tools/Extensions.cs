@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public static class Extensions
 {
@@ -10,5 +11,10 @@ public static class Extensions
     public static Vector3 To3(this Vector2 vector)
     {
         return new Vector3(vector.x, 0, vector.y);
+    }
+
+    public static T Random<T>(this List<T> list)
+    {
+        return list[UnityEngine.Random.Range(0, list.Count)];
     }
 }

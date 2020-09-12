@@ -371,15 +371,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02985809ccfcb934aaa2eb31cb23e4c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FIELD_SIZE: {x: 23, y: 23}
-  BRICKS_COUNT: 50
-  POWERUP_COUNT: 5
-  PLAYER_STEP: 10
-  playerPoints:
-  - {x: 1, y: 0, z: 1}
-  - {x: 9, y: 0, z: 1}
-  - {x: 1, y: 0, z: 9}
-  - {x: 9, y: 0, z: 9}
+  FIELD_SIZE: {x: 9, y: 9}
+  BRICKS_DENSITY: 90
+  POWERUP_DENSITY: 100
+  PLAYER_SPEED: 2
 --- !u!4 &1554096836
 Transform:
   m_ObjectHideFlags: 0

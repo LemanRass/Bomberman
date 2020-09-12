@@ -10,8 +10,10 @@ public class GameManager : MonoBehaviour
 
     public Vector2Int FIELD_SIZE;
 
-    public int BRICKS_COUNT = 30;
-    public int POWERUP_COUNT = 5;
+    [Range(0, 100)]
+    public int BRICKS_DENSITY = 90;
+    [Range(0, 100)]
+    public int POWERUP_DENSITY = 50;
     public float PLAYER_SPEED = 2.0f;
 
     public List<Block> blocks;
@@ -76,7 +78,8 @@ public class GameManager : MonoBehaviour
     {
         bricks = new List<Brick>();
 
-        int bricksCount = BRICKS_COUNT;
+        int count = FIELD_SIZE.x * FIELD_SIZE.y - (blocks.Count + players.Count * 3);
+        int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
 
         while (bricksCount > 0)
         {
@@ -90,7 +93,7 @@ public class GameManager : MonoBehaviour
             if (bricks.Any(n => n.pos.Equals(pos)))
                 continue;
 
-            if (players.Any(n => Vector2.Distance(n.pos, pos) < 2))
+            if (players.Any(n => Vector2.Distance(n.pos, pos) < 2.0f))
                 continue;
 
             bricks.Add(new Brick(pos));
@@ -98,20 +101,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    //Execute only after bricks init
     private void InitPowerUps()
     {
         powerUps = new List<PowerUp>();
-        
-        while(powerUps.Count < POWERUP_COUNT)
+
+        int powerUpCount = Mathf.RoundToInt(bricks.Count * (POWERUP_DENSITY / 100.0f));
+        Debug.Log($"Power Ups Count: {powerUpCount}");
+
+        while(powerUpCount > 0)
         {
-            int wallIdx = UnityEngine.Random.Range(0, bricks.Count);
-            var wall = bricks[wallIdx];
-            if (powerUps.Any(n => n.pos.Equals(wall.pos)))
+            var brick = bricks.Random();
+
+            if (powerUps.Any(n => n.pos.Equals(brick.pos)))
                 continue;
 
             int powerUpId = UnityEngine.Random.Range(0, Database.instance.powerUps.Count);
             var powerUpData = Database.instance.powerUps.ElementAt(powerUpId);
-            powerUps.Add(new PowerUp(powerUpData.Key, wall.pos));
+
+            powerUps.Add(new PowerUp(powerUpData.Key, brick.pos));
+            powerUpCount--;
         }
     }
 
