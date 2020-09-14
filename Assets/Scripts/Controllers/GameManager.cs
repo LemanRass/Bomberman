@@ -40,6 +40,7 @@ public class GameManager : MonoBehaviour
 
         InitPowerUps();
 
+        InitCamera();
     }
 
     private void InitBlocks()
@@ -150,5 +151,14 @@ public class GameManager : MonoBehaviour
         
         player.pos = nextPos;
         onPlayerMoved?.Invoke(player);
+    }
+
+    public void InitCamera()
+    {
+        float x = FIELD_SIZE.x / 2 * -1;
+        float z = FIELD_SIZE.y / 2;
+        float y = Mathf.Abs(x) + Mathf.Abs(z);
+
+        Camera.main.transform.position = new Vector3(x, y, z);
     }
 }
