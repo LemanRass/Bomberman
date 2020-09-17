@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+public enum PowerUPType
+{
+    EXPLOSION_SIZE,
+    EXTRA_BOMB
+}
+
 public class PowerUp
 {
     public PowerUPType type;

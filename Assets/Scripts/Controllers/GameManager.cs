@@ -3,6 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+
+public enum CellType
+{
+    Empty,
+    Player,
+    PowerUp,
+    Block,
+    Brick,
+    Bomb,
+    Outside
+}
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance { get; private set; }
@@ -20,9 +32,13 @@ public class GameManager : MonoBehaviour
     public List<Brick> bricks;
     public List<PowerUp> powerUps;
     public List<Player> players;
+    public List<Bomb> bombs;
 
     public Action onInitDone = null;
     public Action<Player> onPlayerMoved = null;
+    public Action<Bomb> onBombSpawned = null;
+    public Action<Bomb> onBombRemoved = null;
+    public Action<ExplosionType, Vector2> onExplosion = null;
 
     private void Start()
     {
@@ -38,7 +54,9 @@ public class GameManager : MonoBehaviour
 
         InitBricks();
 
-        InitPowerUps();
+        //InitPowerUps();
+
+        InitBombs();
 
         InitCamera();
     }
@@ -117,10 +135,10 @@ public class GameManager : MonoBehaviour
             if (powerUps.Any(n => n.pos.Equals(brick.pos)))
                 continue;
 
-            int powerUpId = UnityEngine.Random.Range(0, Database.instance.powerUps.Count);
-            var powerUpData = Database.instance.powerUps.ElementAt(powerUpId);
+            int powerUpNum = UnityEngine.Random.Range(0, Database.instance.powerUps.Count);
+            var powerUpData = Database.instance.powerUps[powerUpNum];
 
-            powerUps.Add(new PowerUp(powerUpData.Key, brick.pos));
+            powerUps.Add(new PowerUp(powerUpData.type, brick.pos));
             powerUpCount--;
         }
     }
@@ -133,6 +151,11 @@ public class GameManager : MonoBehaviour
         players.Add(new Player(2, new Vector2(1, FIELD_SIZE.y - 2), false));
         players.Add(new Player(3, new Vector2(FIELD_SIZE.x - 2, 1), false));
         players.Add(new Player(4, new Vector2(FIELD_SIZE.x - 2, FIELD_SIZE.y - 2), false));
+    }
+
+    private void InitBombs()
+    {
+        bombs = new List<Bomb>();
     }
 
     public void MovePlayer(int id, Vector2 dir)
@@ -153,6 +176,151 @@ public class GameManager : MonoBehaviour
         onPlayerMoved?.Invoke(player);
     }
 
+    public void SpawnBomb(DBBomb dbBomb, int power, Vector2 pos)
+    {
+        var bomb = new Bomb(dbBomb, power, pos);
+        bombs.Add(bomb);
+        onBombSpawned?.Invoke(bomb);
+    }
+
+    public void RemoveBomb(Bomb bomb)
+    {
+        onBombRemoved?.Invoke(bomb);
+    }
+
+    public void ExplodeBomb(Bomb bomb)
+    {
+        bombs.Remove(bomb);
+        onBombRemoved?.Invoke(bomb);
+
+
+        //Center
+        onExplosion?.Invoke(ExplosionType.Basic, bomb.pos);
+
+
+        //Left
+        for(int x = bomb.pos.ToRoundInt().x - 1; x > bomb.pos.ToRoundInt().x - bomb.power; x--)
+        {
+            var pos = new Vector2(x, bomb.pos.y);
+            var type = GetCellType(pos);
+
+            if(type == CellType.Empty)
+            {
+                onExplosion?.Invoke(ExplosionType.Basic, pos);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        //Right
+        for(int x = bomb.pos.ToRoundInt().x + 1; x < bomb.pos.ToRoundInt().x + bomb.power; x++)
+        {
+            var pos = new Vector2(x, bomb.pos.y);
+            var type = GetCellType(pos);
+
+            if(type == CellType.Empty)
+            {
+                onExplosion?.Invoke(ExplosionType.Basic, pos);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+
+        //Top
+        for(int y = bomb.pos.ToRoundInt().y + 1; y < bomb.pos.ToRoundInt().y + bomb.power; y++)
+        {
+            var pos = new Vector2(bomb.pos.x, y);
+            var type = GetCellType(pos);
+
+            if (type == CellType.Empty)
+            {
+                onExplosion?.Invoke(ExplosionType.Basic, pos);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        //Bot
+        for(int y = bomb.pos.ToRoundInt().y - 1; y > bomb.pos.ToRoundInt().y - bomb.power; y--)
+        {
+            var pos = new Vector2(bomb.pos.x, y);
+            var type = GetCellType(pos);
+
+            if (type == CellType.Empty)
+            {
+                onExplosion?.Invoke(ExplosionType.Basic, pos);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+
+        /*
+        //Calculate explosion
+        for(int i = 0; i < bomb.power; i++)
+        {
+            //Center
+            if(i == 0)
+            {
+                onExplosion?.Invoke(ExplosionType.Basic, bomb.pos);
+            }
+            else
+            {
+                //Right
+                var pos = bomb.pos + new Vector2(i, 0);
+                var type = GetCellType(pos);
+                switch(type)
+                {
+                    case CellType.Empty:
+                        onExplosion?.Invoke(ExplosionType.Basic, pos);
+                        break;
+
+                }
+
+                //Left
+                pos = bomb.pos - new Vector2(i, 0);
+                if (pos.x > 0 && pos.x < FIELD_SIZE.x)
+                {
+                    onExplosion?.Invoke(ExplosionType.Basic, pos);
+                }
+
+                //Top
+                pos = bomb.pos + new Vector2(0, i);
+                if(pos.y > 0 && pos.y < FIELD_SIZE.y)
+                {
+                    onExplosion?.Invoke(ExplosionType.Basic, pos);
+                }
+
+                //Bot
+                pos = bomb.pos + new Vector2(0, i);
+                if (pos.y > 0 && pos.y < FIELD_SIZE.y)
+                {
+                    onExplosion?.Invoke(ExplosionType.Basic, pos);
+                }
+            }
+        }
+
+        onBombRemoved?.Invoke(bomb);*/
+    }
+
+    private void Update()
+    {
+        if(bombs.Count > 0)
+        {
+            var forExplode = bombs.FindAll(n => n.IsReady());
+            forExplode.ForEach(n => ExplodeBomb(n));
+        }
+    }
+
     public void InitCamera()
     {
         float x = FIELD_SIZE.x / 2 * -1;
@@ -161,4 +329,34 @@ public class GameManager : MonoBehaviour
 
         Camera.main.transform.position = new Vector3(x, y, z);
     }
+
+    public CellType GetCellType(Vector2 pos)
+    {
+        var rounded = pos.ToRound();
+
+        if (pos.x < 0 || pos.x >= FIELD_SIZE.x ||
+            pos.y < 0 || pos.y >= FIELD_SIZE.y)
+        {
+            return CellType.Outside;
+        }
+
+        if (players.Any(n => n.pos.ToRound().Equals(rounded)))
+            return CellType.Player;
+
+        /*if (powerUps.Any(n => n.pos.ToRound().Equals(rounded)))
+            return CellType.PowerUp;*/
+
+        if (blocks.Any(n => n.pos.ToRound().Equals(rounded)))
+            return CellType.Block;
+
+        if (bricks.Any(n => n.pos.ToRound().Equals(rounded)))
+            return CellType.Brick;
+
+        if (bombs.Any(n => n.pos.ToRound().Equals(rounded)))
+            return CellType.Bomb;
+
+        return CellType.Empty;
+    }
+
+    
 }

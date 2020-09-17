@@ -153,6 +153,7 @@ MonoBehaviour:
   blocks: []
   bricks: []
   players: []
+  bombs: []
 --- !u!4 &443292811
 Transform:
   m_ObjectHideFlags: 0
@@ -375,6 +376,7 @@ MonoBehaviour:
   BRICKS_DENSITY: 22
   POWERUP_DENSITY: 100
   PLAYER_SPEED: 2
+  bombs: []
 --- !u!4 &1554096836
 Transform:
   m_ObjectHideFlags: 0
@@ -418,13 +420,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18f9b1089f2c4744d92d6a1f72688eee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_powerUps:
-  - name: Explosion size
-    icon: {fileID: 0}
-    type: 0
-  - name: Extra bomb
-    icon: {fileID: 0}
-    type: 1
+  explosions:
+  - type: 0
+    prefab: Explosions/1/Prefab
+  powerUps: []
+  bombs:
+  - id: 1
+    name: Basic Bomb
+    icon: Icons/Bombs/1
+    prefab: Bombs/1/Prefab
+    delay: 3
+    explosion: 0
 --- !u!4 &1578258633
 Transform:
   m_ObjectHideFlags: 0

@@ -6,20 +6,26 @@ public class FieldView : MonoBehaviour
     public List<BlockView> blocks;
     public List<BrickView> bricks;
     public List<PlayerView> players;
+    public List<BombView> bombs;
 
     private void Start()
     {
-        GameManager.instance.onInitDone += Init;
+        GameManager.instance.onInitDone += onInit;
+        GameManager.instance.onBombSpawned += onSpawnBomb;
+        GameManager.instance.onBombRemoved += onRemoveBomb;
+        GameManager.instance.onExplosion += onExplosion;
     }
 
-    private void Init()
+    private void onInit()
     {
         InitBlocks();
         InitBricks();
         InitPlane();
         InitPlayers();
 
-        GameManager.instance.onInitDone -= Init;
+        bombs = new List<BombView>();
+
+        GameManager.instance.onInitDone -= onInit;
     }
 
     private void InitPlane()
@@ -82,5 +88,34 @@ public class FieldView : MonoBehaviour
             player.Init(playerData);
             players.Add(player);
         }
+    }
+
+    private void onSpawnBomb(Bomb bomb)
+    {
+        var prefab = Resources.Load<GameObject>(bomb.data.prefab);
+        var go = Instantiate<GameObject>(prefab, transform);
+        go.transform.localPosition = new Vector3(-bomb.pos.x, 0, bomb.pos.y);
+        var bombView = go.GetComponent<BombView>();
+        bombView.Init(bomb);
+        bombs.Add(bombView);
+    }
+
+    private void onRemoveBomb(Bomb bomb)
+    {
+        //Despawn bomb
+        var b = bombs.Find(n => n.bomb.Equals(bomb));
+        bombs.Remove(b);
+        Destroy(b.gameObject);
+    }
+
+    private void onExplosion(ExplosionType type, Vector2 pos)
+    {
+        //Spawn explosion
+        var explosionDB = Database.GetExplosion(type);
+        var prefab = Resources.Load<GameObject>(explosionDB.prefab);
+        var go = Instantiate<GameObject>(prefab, transform);
+        go.transform.localPosition = new Vector3(-pos.x, 0, pos.y);
+        var explosionView = go.GetComponent<ExplosionView>();
+        explosionView.Explode(1);
     }
 }

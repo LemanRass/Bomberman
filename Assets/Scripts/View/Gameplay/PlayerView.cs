@@ -42,5 +42,11 @@ public class PlayerView : MonoBehaviour
         {
             GameManager.instance.MovePlayer(player.id, new Vector2(-1.0f, 0));
         }
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            var bombData = Database.GetBomb(1);
+            GameManager.instance.SpawnBomb(bombData, 3, player.pos.ToRound());
+        }
     }
 }

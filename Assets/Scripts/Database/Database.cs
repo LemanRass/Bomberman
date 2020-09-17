@@ -5,20 +5,30 @@ public class Database : MonoBehaviour
 {
     public static Database instance { get; private set; }
 
-    [SerializeField]
-    private List<DBPowerUP> m_powerUps;
+    public List<DBExplosion> explosions;
 
-    public Dictionary<PowerUPType, DBPowerUP> powerUps;
+    public List<DBPowerUP> powerUps;
+
+    public List<DBBomb> bombs;
+
 
     private void Awake()
     {
         instance = this;
-        powerUps = new Dictionary<PowerUPType, DBPowerUP>();
-        m_powerUps.ForEach(n => powerUps.Add(n.type, n));
     }
 
-    public static DBPowerUP PowerUP(PowerUPType type)
+    public static DBExplosion GetExplosion(ExplosionType type)
     {
-        return instance.powerUps[type];
+        return instance.explosions.Find(n => n.type.Equals(type));
+    }
+
+    public static DBBomb GetBomb(int id)
+    {
+        return instance.bombs.Find(n => n.id.Equals(id));
+    }
+
+    public static DBPowerUP GetPowerUP(PowerUPType type)
+    {
+        return instance.powerUps.Find(n => n.type.Equals(type));
     }
 }
