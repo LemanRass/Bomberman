@@ -62,15 +62,15 @@ public class FieldView : MonoBehaviour
     {
         bricks = new List<BrickView>();
 
-        foreach(var brickData in GameManager.instance.bricks)
+        foreach(var brick in GameManager.instance.bricks)
         {
-            var prefab = Resources.Load<GameObject>("Bricks/1/Brick_1");
+            var prefab = Resources.Load<GameObject>(brick.data.prefab);
             var go = Instantiate<GameObject>(prefab, transform);
-            float x = -(brickData.pos.x * go.transform.localScale.x);
-            float z = brickData.pos.y * go.transform.localScale.z;
+            float x = -(brick.pos.x * go.transform.localScale.x);
+            float z = brick.pos.y * go.transform.localScale.z;
             go.transform.localPosition = new Vector3(x, 0, z);
-            var brick = go.GetComponent<BrickView>();
-            bricks.Add(brick);
+            var view = go.GetComponent<BrickView>();
+            bricks.Add(view);
         }
     }
 
@@ -95,9 +95,9 @@ public class FieldView : MonoBehaviour
         var prefab = Resources.Load<GameObject>(bomb.data.prefab);
         var go = Instantiate<GameObject>(prefab, transform);
         go.transform.localPosition = new Vector3(-bomb.pos.x, 0, bomb.pos.y);
-        var bombView = go.GetComponent<BombView>();
-        bombView.Init(bomb);
-        bombs.Add(bombView);
+        var view = go.GetComponent<BombView>();
+        view.Init(bomb);
+        bombs.Add(view);
     }
 
     private void onRemoveBomb(Bomb bomb)

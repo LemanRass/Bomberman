@@ -100,6 +100,8 @@ public class GameManager : MonoBehaviour
         int count = FIELD_SIZE.x * FIELD_SIZE.y - (blocks.Count + players.Count * 3);
         int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
 
+        var brickData = Database.instance.bricks.Last();
+
         while (bricksCount > 0)
         {
             int x = UnityEngine.Random.Range(0, FIELD_SIZE.x);
@@ -115,7 +117,7 @@ public class GameManager : MonoBehaviour
             if (players.Any(n => Vector2.Distance(n.pos, pos) < 2.0f))
                 continue;
 
-            bricks.Add(new Brick(pos));
+            bricks.Add(new Brick(brickData, pos));
             bricksCount--;
         }
     }
@@ -262,54 +264,6 @@ public class GameManager : MonoBehaviour
                 break;
             }
         }
-
-
-        /*
-        //Calculate explosion
-        for(int i = 0; i < bomb.power; i++)
-        {
-            //Center
-            if(i == 0)
-            {
-                onExplosion?.Invoke(ExplosionType.Basic, bomb.pos);
-            }
-            else
-            {
-                //Right
-                var pos = bomb.pos + new Vector2(i, 0);
-                var type = GetCellType(pos);
-                switch(type)
-                {
-                    case CellType.Empty:
-                        onExplosion?.Invoke(ExplosionType.Basic, pos);
-                        break;
-
-                }
-
-                //Left
-                pos = bomb.pos - new Vector2(i, 0);
-                if (pos.x > 0 && pos.x < FIELD_SIZE.x)
-                {
-                    onExplosion?.Invoke(ExplosionType.Basic, pos);
-                }
-
-                //Top
-                pos = bomb.pos + new Vector2(0, i);
-                if(pos.y > 0 && pos.y < FIELD_SIZE.y)
-                {
-                    onExplosion?.Invoke(ExplosionType.Basic, pos);
-                }
-
-                //Bot
-                pos = bomb.pos + new Vector2(0, i);
-                if (pos.y > 0 && pos.y < FIELD_SIZE.y)
-                {
-                    onExplosion?.Invoke(ExplosionType.Basic, pos);
-                }
-            }
-        }
-
-        onBombRemoved?.Invoke(bomb);*/
     }
 
     private void Update()

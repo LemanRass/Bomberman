@@ -420,13 +420,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18f9b1089f2c4744d92d6a1f72688eee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bricks:
+  - name: Basic Brick
+    prefab: Bricks/1/Brick_1
+    explosion: 0
+  - name: Advanced Brick
+    prefab: Bricks/2/Brick_2
+    explosion: 0
   explosions:
   - type: 0
     prefab: Explosions/1/Prefab
   powerUps: []
   bombs:
-  - id: 1
-    name: Basic Bomb
+  - name: Basic Bomb
     icon: Icons/Bombs/1
     prefab: Bombs/1/Prefab
     delay: 3

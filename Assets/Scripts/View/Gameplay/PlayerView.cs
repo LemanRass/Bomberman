@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 public class PlayerView : MonoBehaviour
 {
@@ -45,7 +46,7 @@ public class PlayerView : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            var bombData = Database.GetBomb(1);
+            var bombData = Database.instance.bombs.First();
             GameManager.instance.SpawnBomb(bombData, 3, player.pos.ToRound());
         }
     }
