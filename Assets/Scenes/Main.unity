@@ -150,6 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a8d41b79c9092744838626c26c7db12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ground: {fileID: 0}
   blocks: []
   bricks: []
   players: []
@@ -440,6 +441,11 @@ MonoBehaviour:
   - type: 0
     prefab: Explosions/1/Prefab
   powerUps: []
+  players:
+  - name: Blue Player
+    prefab: Players/1/Player_1
+  - name: Green Player
+    prefab: Players/2/Player_2
   bombs:
   - name: Basic Bomb
     icon: Icons/Bombs/1

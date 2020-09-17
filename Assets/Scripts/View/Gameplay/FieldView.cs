@@ -81,15 +81,15 @@ public class FieldView : MonoBehaviour
     {
         players = new List<PlayerView>();
 
-        foreach(var playerData in GameManager.instance.players)
+        foreach(var player in GameManager.instance.players)
         {
-            int idx = playerData.isLocal ? 1 : 2;
-            var prefab = Resources.Load<GameObject>($"Players/{idx}/Player_{idx}");
+            int idx = player.isLocal ? 1 : 2;
+            var prefab = Resources.Load<GameObject>(player.data.prefab);
             var go = Instantiate<GameObject>(prefab, transform);
-            go.transform.localPosition = new Vector3(-playerData.pos.x, 0, playerData.pos.y);
-            var player = go.GetComponent<PlayerView>();
-            player.Init(playerData);
-            players.Add(player);
+            go.transform.localPosition = new Vector3(-player.pos.x, 0, player.pos.y);
+            var view = go.GetComponent<PlayerView>();
+            view.Init(player);
+            players.Add(view);
         }
     }
 

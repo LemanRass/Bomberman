@@ -15,6 +15,8 @@ public class Database : MonoBehaviour
 
     public List<DBPowerUP> powerUps;
 
+    public List<DBPlayer> players;
+
     public List<DBBomb> bombs;
 
 

@@ -169,10 +169,17 @@ public class GameManager : MonoBehaviour
     {
         players = new List<Player>();
 
-        players.Add(new Player(1, new Vector2(1, 1), true));
-        players.Add(new Player(2, new Vector2(1, FIELD_SIZE.y - 2), false));
-        players.Add(new Player(3, new Vector2(FIELD_SIZE.x - 2, 1), false));
-        players.Add(new Player(4, new Vector2(FIELD_SIZE.x - 2, FIELD_SIZE.y - 2), false));
+        var firstPlayerData = Database.instance.players.First();
+        players.Add(new Player(1, firstPlayerData, new Vector2(1, 1), true));
+
+        var secondPlayerData = Database.instance.players.Last();
+        players.Add(new Player(2, secondPlayerData, new Vector2(1, FIELD_SIZE.y - 2), false));
+
+        var thirdPlayerData = Database.instance.players.Last();
+        players.Add(new Player(3, thirdPlayerData, new Vector2(FIELD_SIZE.x - 2, 1), false));
+
+        var fourthPlayerData = Database.instance.players.Last();
+        players.Add(new Player(4, fourthPlayerData, new Vector2(FIELD_SIZE.x - 2, FIELD_SIZE.y - 2), false));
     }
 
     private void InitBombs()
