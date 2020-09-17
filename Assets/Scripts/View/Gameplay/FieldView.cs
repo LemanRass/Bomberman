@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class FieldView : MonoBehaviour
 {
+    public GroundView ground;
     public List<BlockView> blocks;
     public List<BrickView> bricks;
     public List<PlayerView> players;
@@ -20,7 +21,7 @@ public class FieldView : MonoBehaviour
     {
         InitBlocks();
         InitBricks();
-        InitPlane();
+        InitGround();
         InitPlayers();
 
         bombs = new List<BombView>();
@@ -28,7 +29,7 @@ public class FieldView : MonoBehaviour
         GameManager.instance.onInitDone -= onInit;
     }
 
-    private void InitPlane()
+    private void InitGround()
     {
         var prefab = Resources.Load<GameObject>(GameManager.instance.ground.data.prefab);
         var go = Instantiate<GameObject>(prefab, transform);
@@ -40,6 +41,8 @@ public class FieldView : MonoBehaviour
         float posX = (scaleX - 1.0f) / 2 * -1.0f;
         float posZ = (scaleZ - 1.0f) / 2;
         go.transform.localPosition = new Vector3(posX, 0, posZ);
+
+        ground = go.GetComponent<GroundView>();
     }
 
     private void InitBlocks()
