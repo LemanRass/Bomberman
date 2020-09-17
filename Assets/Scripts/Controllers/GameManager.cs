@@ -28,11 +28,11 @@ public class GameManager : MonoBehaviour
     public int POWERUP_DENSITY = 50;
     public float PLAYER_SPEED = 2.0f;
 
-    public List<Block> blocks;
-    public List<Brick> bricks;
-    public List<PowerUp> powerUps;
-    public List<Player> players;
-    public List<Bomb> bombs;
+    public List<Block> blocks = new List<Block>();
+    public List<Brick> bricks = new List<Brick>();
+    public List<PowerUp> powerUps = new List<PowerUp>();
+    public List<Player> players = new List<Player>();
+    public List<Bomb> bombs = new List<Bomb>();
 
     public Action onInitDone = null;
     public Action<Player> onPlayerMoved = null;
@@ -76,13 +76,15 @@ public class GameManager : MonoBehaviour
     {
         blocks = new List<Block>();
 
+        var blockData = Database.instance.blocks.First();
+
         for (int y = 0; y < FIELD_SIZE.y; y++)
         {
             for (int x = 0; x < FIELD_SIZE.x; x++)
             {
                 if (y == 0 || y == FIELD_SIZE.y - 1)
                 {
-                    blocks.Add(new Block(x, y));
+                    blocks.Add(new Block(blockData, new Vector2(x, y)));
                     continue;
                 }
 
@@ -90,14 +92,14 @@ public class GameManager : MonoBehaviour
                 {
                     if (x == 0 || x == FIELD_SIZE.x - 1)
                     {
-                        blocks.Add(new Block(x, y));
+                        blocks.Add(new Block(blockData, new Vector2(x, y)));
                     }
                 }
                 else
                 {
                     if ((x % 2) == 0)
                     {
-                        blocks.Add(new Block(x, y));
+                        blocks.Add(new Block(blockData, new Vector2(x, y)));
                     }
                 }
             }

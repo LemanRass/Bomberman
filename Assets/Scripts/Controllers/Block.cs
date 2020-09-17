@@ -3,15 +3,12 @@
 //Undestroyable block
 public class Block
 {
+    public DBBlock data;
     public Vector2 pos;
 
-    public Block(int x, int y)
+    public Block(DBBlock data, Vector2 pos)
     {
-        pos = new Vector2(x, y);
-    }
-
-    public Block(Vector2Int pos)
-    {
+        this.data = data;
         this.pos = pos;
     }
 

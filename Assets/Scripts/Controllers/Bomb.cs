@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Bomb : MonoBehaviour
+public class Bomb
 {
     public DBBomb data;
     public Vector2 pos;

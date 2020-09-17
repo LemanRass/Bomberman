@@ -46,15 +46,15 @@ public class FieldView : MonoBehaviour
     {
         blocks = new List<BlockView>();
 
-        foreach(var blockData in GameManager.instance.blocks)
+        foreach(var block in GameManager.instance.blocks)
         {
-            var prefab = Resources.Load<GameObject>($"Blocks/1/Block_1");
+            var prefab = Resources.Load<GameObject>(block.data.prefab);
             var go = Instantiate<GameObject>(prefab, transform);
-            float x = -(blockData.pos.x * go.transform.localScale.x);
-            float z = blockData.pos.y * go.transform.localScale.z;
+            float x = -(block.pos.x * go.transform.localScale.x);
+            float z = block.pos.y * go.transform.localScale.z;
             go.transform.localPosition = new Vector3(x, 0, z);
-            var block = go.GetComponent<BlockView>();
-            blocks.Add(block);
+            var view = go.GetComponent<BlockView>();
+            blocks.Add(view);
         }
     }
 

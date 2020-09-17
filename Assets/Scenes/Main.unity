@@ -376,7 +376,6 @@ MonoBehaviour:
   BRICKS_DENSITY: 100
   POWERUP_DENSITY: 100
   PLAYER_SPEED: 2
-  bombs: []
 --- !u!4 &1554096836
 Transform:
   m_ObjectHideFlags: 0
@@ -420,6 +419,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18f9b1089f2c4744d92d6a1f72688eee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blocks:
+  - name: Basic Block
+    prefab: Blocks/1/Block_1
   bricks:
   - name: Basic Brick
     prefab: Bricks/1/Brick_1

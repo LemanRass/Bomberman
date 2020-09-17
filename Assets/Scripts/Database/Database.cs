@@ -5,6 +5,8 @@ public class Database : MonoBehaviour
 {
     public static Database instance { get; private set; }
 
+    public List<DBBlock> blocks;
+
     public List<DBBrick> bricks;
 
     public List<DBExplosion> explosions;
