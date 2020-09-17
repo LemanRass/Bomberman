@@ -373,7 +373,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FIELD_SIZE: {x: 11, y: 11}
-  BRICKS_DENSITY: 22
+  BRICKS_DENSITY: 100
   POWERUP_DENSITY: 100
   PLAYER_SPEED: 2
   bombs: []

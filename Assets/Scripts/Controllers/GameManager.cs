@@ -46,6 +46,17 @@ public class GameManager : MonoBehaviour
         onInitDone?.Invoke();
     }
 
+    private void Update()
+    {
+        if (bombs.Count > 0)
+        {
+            var forExplode = bombs.FindAll(n => n.IsReady());
+            forExplode.ForEach(n => ExplodeBomb(n));
+        }
+    }
+
+    #region Initialization
+
     public void Init()
     {
         InitBlocks();
@@ -108,10 +119,8 @@ public class GameManager : MonoBehaviour
             int y = UnityEngine.Random.Range(0, FIELD_SIZE.y);
             var pos = new Vector2(x, y);
 
-            if (blocks.Any(n => n.pos.Equals(pos)))
-                continue;
-
-            if (bricks.Any(n => n.pos.Equals(pos)))
+            var cell = GetCellType(pos);
+            if (cell != CellType.Empty)
                 continue;
 
             if (players.Any(n => Vector2.Distance(n.pos, pos) < 2.0f))
@@ -159,6 +168,20 @@ public class GameManager : MonoBehaviour
     {
         bombs = new List<Bomb>();
     }
+
+    public void InitCamera()
+    {
+        float x = FIELD_SIZE.x / 2 * -1;
+        float z = FIELD_SIZE.y / 2;
+        float y = Mathf.Abs(x) + Mathf.Abs(z);
+
+        Camera.main.transform.position = new Vector3(x, y, z);
+    }
+
+    #endregion
+
+
+    #region Actions
 
     public void MovePlayer(int id, Vector2 dir)
     {
@@ -266,23 +289,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if(bombs.Count > 0)
-        {
-            var forExplode = bombs.FindAll(n => n.IsReady());
-            forExplode.ForEach(n => ExplodeBomb(n));
-        }
-    }
+    #endregion
 
-    public void InitCamera()
-    {
-        float x = FIELD_SIZE.x / 2 * -1;
-        float z = FIELD_SIZE.y / 2;
-        float y = Mathf.Abs(x) + Mathf.Abs(z);
 
-        Camera.main.transform.position = new Vector3(x, y, z);
-    }
+
+    #region Tools
 
     public CellType GetCellType(Vector2 pos)
     {
@@ -312,5 +323,5 @@ public class GameManager : MonoBehaviour
         return CellType.Empty;
     }
 
-    
+    #endregion
 }
