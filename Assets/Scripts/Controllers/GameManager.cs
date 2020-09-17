@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
     public int POWERUP_DENSITY = 50;
     public float PLAYER_SPEED = 2.0f;
 
+    public Ground ground;
     public List<Block> blocks = new List<Block>();
     public List<Brick> bricks = new List<Brick>();
     public List<PowerUp> powerUps = new List<PowerUp>();
@@ -59,6 +60,8 @@ public class GameManager : MonoBehaviour
 
     public void Init()
     {
+        InitGround();
+
         InitBlocks();
 
         InitPlayers();
@@ -70,6 +73,12 @@ public class GameManager : MonoBehaviour
         InitBombs();
 
         InitCamera();
+    }
+
+    private void InitGround()
+    {
+        var groundData = Database.instance.grounds.First();
+        ground = new Ground(groundData);
     }
 
     private void InitBlocks()

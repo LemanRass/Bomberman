@@ -30,7 +30,7 @@ public class FieldView : MonoBehaviour
 
     private void InitPlane()
     {
-        var prefab = Resources.Load<GameObject>($"Planes/1/Plane_1");
+        var prefab = Resources.Load<GameObject>(GameManager.instance.ground.data.prefab);
         var go = Instantiate<GameObject>(prefab, transform);
 
         float scaleX = GameManager.instance.FIELD_SIZE.x;
