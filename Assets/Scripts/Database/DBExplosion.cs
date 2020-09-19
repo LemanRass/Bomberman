@@ -2,7 +2,8 @@
 
 public enum ExplosionType
 {
-    Basic
+    Basic,
+    Brick
 }
 
 [Serializable]

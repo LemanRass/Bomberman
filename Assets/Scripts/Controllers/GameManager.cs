@@ -39,6 +39,7 @@ public class GameManager : MonoBehaviour
     public Action<Player> onPlayerMoved = null;
     public Action<Bomb> onBombSpawned = null;
     public Action<Bomb> onBombRemoved = null;
+    public Action<Brick> onBrickDestroyed = null;
     public Action<ExplosionType, Vector2> onExplosion = null;
 
     private void Start()
@@ -68,7 +69,7 @@ public class GameManager : MonoBehaviour
 
         InitBricks();
 
-        //InitPowerUps();
+        InitPowerUps();
 
         InitBombs();
 
@@ -150,7 +151,7 @@ public class GameManager : MonoBehaviour
         int powerUpCount = Mathf.RoundToInt(bricks.Count * (POWERUP_DENSITY / 100.0f));
         Debug.Log($"Power Ups Count: {powerUpCount}");
 
-        while(powerUpCount > 0)
+        /*while(powerUpCount > 0)
         {
             var brick = bricks.Random();
 
@@ -162,7 +163,7 @@ public class GameManager : MonoBehaviour
 
             powerUps.Add(new PowerUp(powerUpData.type, brick.pos));
             powerUpCount--;
-        }
+        }*/
     }
 
     private void InitPlayers()
@@ -214,7 +215,16 @@ public class GameManager : MonoBehaviour
                 nextPos = block.pos + (nextPos - block.pos).normalized * 0.98f;
             }
         }
-        
+
+        //Works for spheres
+        foreach (var brick in bricks)
+        {
+            if (Vector3.Distance(brick.pos, nextPos) < 0.98f)
+            {
+                nextPos = brick.pos + (nextPos - brick.pos).normalized * 0.98f;
+            }
+        }
+
         player.pos = nextPos;
         onPlayerMoved?.Invoke(player);
     }
@@ -245,64 +255,68 @@ public class GameManager : MonoBehaviour
         for(int x = bomb.pos.ToRoundInt().x - 1; x > bomb.pos.ToRoundInt().x - bomb.power; x--)
         {
             var pos = new Vector2(x, bomb.pos.y);
-            var type = GetCellType(pos);
-
-            if(type == CellType.Empty)
-            {
-                onExplosion?.Invoke(ExplosionType.Basic, pos);
-            }
-            else
-            {
+            if (HandleDestruction(pos))
                 break;
-            }
         }
 
         //Right
         for(int x = bomb.pos.ToRoundInt().x + 1; x < bomb.pos.ToRoundInt().x + bomb.power; x++)
         {
             var pos = new Vector2(x, bomb.pos.y);
-            var type = GetCellType(pos);
-
-            if(type == CellType.Empty)
-            {
-                onExplosion?.Invoke(ExplosionType.Basic, pos);
-            }
-            else
-            {
+            if (HandleDestruction(pos))
                 break;
-            }
         }
-
 
         //Top
         for(int y = bomb.pos.ToRoundInt().y + 1; y < bomb.pos.ToRoundInt().y + bomb.power; y++)
         {
             var pos = new Vector2(bomb.pos.x, y);
-            var type = GetCellType(pos);
-
-            if (type == CellType.Empty)
-            {
-                onExplosion?.Invoke(ExplosionType.Basic, pos);
-            }
-            else
-            {
+            if (HandleDestruction(pos))
                 break;
-            }
         }
 
         //Bot
         for(int y = bomb.pos.ToRoundInt().y - 1; y > bomb.pos.ToRoundInt().y - bomb.power; y--)
         {
             var pos = new Vector2(bomb.pos.x, y);
+            if (HandleDestruction(pos))
+                break;
+        }
+
+        bool HandleDestruction(Vector2 pos)
+        {
             var type = GetCellType(pos);
 
-            if (type == CellType.Empty)
+            switch(type)
             {
-                onExplosion?.Invoke(ExplosionType.Basic, pos);
-            }
-            else
-            {
-                break;
+                case CellType.Bomb:
+                    //var bomb =
+                    //Explode bomb
+                    return true;
+
+                case CellType.Brick:
+                    var brick = bricks.Find(n => n.pos.Equals(pos));
+                    bricks.Remove(brick);
+                    onBrickDestroyed?.Invoke(brick);
+                    return true;
+
+                case CellType.Player:
+                    //var player ...
+                    //Destroy player
+                    return false;
+
+                case CellType.PowerUp:
+                    //var powerUp ...
+                    //Destroy powerUp
+                    return false;
+
+                case CellType.Empty:
+                    onExplosion?.Invoke(ExplosionType.Basic, pos);
+                    return false;
+
+                default:
+
+                    return true;
             }
         }
     }
@@ -326,8 +340,8 @@ public class GameManager : MonoBehaviour
         if (players.Any(n => n.pos.ToRound().Equals(rounded)))
             return CellType.Player;
 
-        /*if (powerUps.Any(n => n.pos.ToRound().Equals(rounded)))
-            return CellType.PowerUp;*/
+        if (powerUps.Any(n => n.pos.ToRound().Equals(rounded)))
+            return CellType.PowerUp;
 
         if (blocks.Any(n => n.pos.ToRound().Equals(rounded)))
             return CellType.Block;

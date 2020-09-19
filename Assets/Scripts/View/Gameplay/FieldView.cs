@@ -15,6 +15,7 @@ public class FieldView : MonoBehaviour
         GameManager.instance.onBombSpawned += onSpawnBomb;
         GameManager.instance.onBombRemoved += onRemoveBomb;
         GameManager.instance.onExplosion += onExplosion;
+        GameManager.instance.onBrickDestroyed += onBrickDestroyed;
     }
 
     private void onInit()
@@ -73,6 +74,7 @@ public class FieldView : MonoBehaviour
             float z = brick.pos.y * go.transform.localScale.z;
             go.transform.localPosition = new Vector3(x, 0, z);
             var view = go.GetComponent<BrickView>();
+            view.Init(brick);
             bricks.Add(view);
         }
     }
@@ -106,9 +108,9 @@ public class FieldView : MonoBehaviour
     private void onRemoveBomb(Bomb bomb)
     {
         //Despawn bomb
-        var b = bombs.Find(n => n.bomb.Equals(bomb));
-        bombs.Remove(b);
-        Destroy(b.gameObject);
+        var item = bombs.Find(n => n.bomb.Equals(bomb));
+        bombs.Remove(item);
+        Destroy(item.gameObject);
     }
 
     private void onExplosion(ExplosionType type, Vector2 pos)
@@ -120,5 +122,12 @@ public class FieldView : MonoBehaviour
         go.transform.localPosition = new Vector3(-pos.x, 0, pos.y);
         var explosionView = go.GetComponent<ExplosionView>();
         explosionView.Explode(1);
+    }
+
+    private void onBrickDestroyed(Brick brick)
+    {
+        var item = bricks.Find(n => n.brick.Equals(brick));
+        bricks.Remove(item);
+        Destroy(item.gameObject);
     }
 }

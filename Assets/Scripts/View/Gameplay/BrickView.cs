@@ -1,18 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BrickView : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Brick brick;
 
-    // Update is called once per frame
-    void Update()
+    public void Init(Brick brick)
     {
-        
+        this.brick = brick;
     }
 }
