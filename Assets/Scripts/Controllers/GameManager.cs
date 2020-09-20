@@ -226,6 +226,18 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        //Works for spheres
+        foreach (var bomb in bombs)
+        {
+            if (Vector3.Distance(bomb.pos, nextPos) < 0.98f)
+            {
+                if (Vector3.Distance(bomb.pos, player.pos) < 0.9f)
+                    continue;
+
+                nextPos = bomb.pos + (nextPos - bomb.pos).normalized * 0.98f;
+            }
+        }
+
         player.pos = nextPos;
         onMovePlayer?.Invoke(player);
     }
