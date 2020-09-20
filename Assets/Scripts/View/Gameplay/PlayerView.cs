@@ -9,7 +9,7 @@ public class PlayerView : MonoBehaviour
     public void Init(Player player)
     {
         this.player = player;
-        transform.localPosition = new Vector3(-player.pos.x, 0, player.pos.y);
+        transform.localPosition = new Vector3(-player.pos.x, 0.5f, player.pos.y);
     }
 
     public void OnPlayerMoved()

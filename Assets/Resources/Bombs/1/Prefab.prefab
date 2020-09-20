@@ -332,7 +332,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minScale: 0.5
   maxScale: 0.6
-  pulseSpeed: 1
+  firePrefab: {fileID: 100002, guid: 21f6aea0c9b788c4b9b6275efc33d0f9, type: 3}
+  bubochki:
+  - {fileID: 319656346150773488}
+  - {fileID: 8921305299786774567}
+  - {fileID: 8541039610202455689}
+  - {fileID: 3671177223201935169}
+  - {fileID: 5017853749389960664}
+  - {fileID: 8623744432229156580}
+  - {fileID: 1133451908205961582}
+  - {fileID: 5410228794054261731}
+  - {fileID: 6753277706545691419}
+  - {fileID: 1056488293225632720}
+  pulseSpeed: 0.5
 --- !u!1 &3671177223201935169
 GameObject:
   m_ObjectHideFlags: 0
