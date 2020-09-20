@@ -3,20 +3,25 @@ using UnityEngine;
 
 public class PlayerView : MonoBehaviour
 {
-    private Player player;
+    [HideInInspector]
+    public Player player;
 
     public void Init(Player player)
     {
         this.player = player;
-        GameManager.instance.onPlayerMoved += OnPlayerMoved;
+        transform.localPosition = new Vector3(-player.pos.x, 0, player.pos.y);
     }
 
-    private void OnPlayerMoved(Player player)
+    public void OnPlayerMoved()
     {
-        if(this.player.id.Equals(player.id))
-        {
-            transform.localPosition = new Vector3(player.pos.x * -1, transform.localPosition.y, player.pos.y);
-        }
+        transform.localPosition = new Vector3(player.pos.x * -1, transform.localPosition.y, player.pos.y);
+    }
+
+    public void OnPlayerDeath()
+    {
+        //Some death things
+        //animation, sound, etc
+        Destroy(gameObject);
     }
 
     private void Update()

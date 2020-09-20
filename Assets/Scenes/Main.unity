@@ -440,6 +440,8 @@ MonoBehaviour:
   explosions:
   - type: 0
     prefab: Explosions/1/Prefab
+  - type: 1
+    prefab: Explosions/2/Prefab
   powerUps: []
   players:
   - name: Blue Player

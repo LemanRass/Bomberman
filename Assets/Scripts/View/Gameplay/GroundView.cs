@@ -1,18 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GroundView : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Ground ground;
 
-    // Update is called once per frame
-    void Update()
+    public void Init(Ground ground)
     {
-        
+        this.ground = ground;
+
+        float scaleX = GameManager.instance.FIELD_SIZE.x;
+        float scaleZ = GameManager.instance.FIELD_SIZE.y;
+        transform.localScale = new Vector3(scaleX, 0.1f, scaleZ);
+
+        float posX = (scaleX - 1.0f) / 2 * -1.0f;
+        float posZ = (scaleZ - 1.0f) / 2;
+        transform.localPosition = new Vector3(posX, 0, posZ);
     }
 }

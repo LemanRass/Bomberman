@@ -16,6 +16,8 @@ public class FieldView : MonoBehaviour
         GameManager.instance.onBombRemoved += onRemoveBomb;
         GameManager.instance.onExplosion += onExplosion;
         GameManager.instance.onBrickDestroyed += onBrickDestroyed;
+        GameManager.instance.onMovePlayer += onMovePlayer;
+        GameManager.instance.onDeathPlayer += onDeathPlayer;
     }
 
     private void onInit()
@@ -32,18 +34,12 @@ public class FieldView : MonoBehaviour
 
     private void InitGround()
     {
-        var prefab = Resources.Load<GameObject>(GameManager.instance.ground.data.prefab);
+        var ground = GameManager.instance.ground;
+        var prefab = Resources.Load<GameObject>(ground.data.prefab);
         var go = Instantiate<GameObject>(prefab, transform);
-
-        float scaleX = GameManager.instance.FIELD_SIZE.x;
-        float scaleZ = GameManager.instance.FIELD_SIZE.y;
-        go.transform.localScale = new Vector3(scaleX, 0.1f, scaleZ);
-
-        float posX = (scaleX - 1.0f) / 2 * -1.0f;
-        float posZ = (scaleZ - 1.0f) / 2;
-        go.transform.localPosition = new Vector3(posX, 0, posZ);
-
-        ground = go.GetComponent<GroundView>();
+        var view = go.GetComponent<GroundView>();
+        view.Init(ground);
+        this.ground = view;
     }
 
     private void InitBlocks()
@@ -54,10 +50,8 @@ public class FieldView : MonoBehaviour
         {
             var prefab = Resources.Load<GameObject>(block.data.prefab);
             var go = Instantiate<GameObject>(prefab, transform);
-            float x = -(block.pos.x * go.transform.localScale.x);
-            float z = block.pos.y * go.transform.localScale.z;
-            go.transform.localPosition = new Vector3(x, 0, z);
             var view = go.GetComponent<BlockView>();
+            view.Init(block);
             blocks.Add(view);
         }
     }
@@ -70,9 +64,6 @@ public class FieldView : MonoBehaviour
         {
             var prefab = Resources.Load<GameObject>(brick.data.prefab);
             var go = Instantiate<GameObject>(prefab, transform);
-            float x = -(brick.pos.x * go.transform.localScale.x);
-            float z = brick.pos.y * go.transform.localScale.z;
-            go.transform.localPosition = new Vector3(x, 0, z);
             var view = go.GetComponent<BrickView>();
             view.Init(brick);
             bricks.Add(view);
@@ -88,7 +79,6 @@ public class FieldView : MonoBehaviour
             int idx = player.isLocal ? 1 : 2;
             var prefab = Resources.Load<GameObject>(player.data.prefab);
             var go = Instantiate<GameObject>(prefab, transform);
-            go.transform.localPosition = new Vector3(-player.pos.x, 0, player.pos.y);
             var view = go.GetComponent<PlayerView>();
             view.Init(player);
             players.Add(view);
@@ -99,7 +89,6 @@ public class FieldView : MonoBehaviour
     {
         var prefab = Resources.Load<GameObject>(bomb.data.prefab);
         var go = Instantiate<GameObject>(prefab, transform);
-        go.transform.localPosition = new Vector3(-bomb.pos.x, 0, bomb.pos.y);
         var view = go.GetComponent<BombView>();
         view.Init(bomb);
         bombs.Add(view);
@@ -107,21 +96,32 @@ public class FieldView : MonoBehaviour
 
     private void onRemoveBomb(Bomb bomb)
     {
-        //Despawn bomb
         var item = bombs.Find(n => n.bomb.Equals(bomb));
         bombs.Remove(item);
         Destroy(item.gameObject);
     }
 
+    private void onMovePlayer(Player player)
+    {
+        var item = players.Find(n => n.player.Equals(player));
+        item.OnPlayerMoved();
+    }
+
+    private void onDeathPlayer(Player player)
+    {
+        var item = players.Find(n => n.player.Equals(player));
+        players.Remove(item);
+        item.OnPlayerDeath();
+    }
+
     private void onExplosion(ExplosionType type, Vector2 pos)
     {
-        //Spawn explosion
+        //Spawn explosion shell
         var explosionDB = Database.GetExplosion(type);
         var prefab = Resources.Load<GameObject>(explosionDB.prefab);
         var go = Instantiate<GameObject>(prefab, transform);
-        go.transform.localPosition = new Vector3(-pos.x, 0, pos.y);
         var explosionView = go.GetComponent<ExplosionView>();
-        explosionView.Explode(1);
+        explosionView.Explode(pos);
     }
 
     private void onBrickDestroyed(Brick brick)

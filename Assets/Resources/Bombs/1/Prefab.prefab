@@ -330,7 +330,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b2c523c89fce4c3185f38ce11be1fd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bomb: {fileID: 0}
+  minScale: 0.5
+  maxScale: 0.6
+  pulseSpeed: 1
 --- !u!1 &3671177223201935169
 GameObject:
   m_ObjectHideFlags: 0

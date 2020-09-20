@@ -36,7 +36,8 @@ public class GameManager : MonoBehaviour
     public List<Bomb> bombs = new List<Bomb>();
 
     public Action onInitDone = null;
-    public Action<Player> onPlayerMoved = null;
+    public Action<Player> onMovePlayer = null;
+    public Action<Player> onDeathPlayer = null;
     public Action<Bomb> onBombSpawned = null;
     public Action<Bomb> onBombRemoved = null;
     public Action<Brick> onBrickDestroyed = null;
@@ -123,7 +124,7 @@ public class GameManager : MonoBehaviour
         int count = FIELD_SIZE.x * FIELD_SIZE.y - (blocks.Count + players.Count * 3);
         int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
 
-        var brickData = Database.instance.bricks.Last();
+        var brickData = Database.instance.bricks.First();
 
         while (bricksCount > 0)
         {
@@ -226,7 +227,13 @@ public class GameManager : MonoBehaviour
         }
 
         player.pos = nextPos;
-        onPlayerMoved?.Invoke(player);
+        onMovePlayer?.Invoke(player);
+    }
+
+    public void DeathPlayer(Player player)
+    {
+        players.Remove(player);
+        onDeathPlayer?.Invoke(player);
     }
 
     public void SpawnBomb(DBBomb dbBomb, int power, Vector2 pos)
