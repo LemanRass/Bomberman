@@ -268,6 +268,7 @@ public class GameManager : MonoBehaviour
 
         //Center
         onExplosion?.Invoke(ExplosionType.Basic, bomb.pos);
+        HandleDestruction(bomb.pos);
 
 
         //Left
@@ -355,8 +356,9 @@ public class GameManager : MonoBehaviour
                 return true;
 
             case CellType.Player:
-                //var player ...
-                //Destroy player
+                var player = players.Find(n => n.pos.ToRound().Equals(pos.ToRound()));
+                players.Remove(player);
+                onDeathPlayer?.Invoke(player);
                 return false;
 
             case CellType.PowerUp:

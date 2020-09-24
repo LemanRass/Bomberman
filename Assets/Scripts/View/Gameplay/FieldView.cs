@@ -76,7 +76,6 @@ public class FieldView : MonoBehaviour
 
         foreach(var player in GameManager.instance.players)
         {
-            int idx = player.isLocal ? 1 : 2;
             var prefab = Resources.Load<GameObject>(player.data.prefab);
             var go = Instantiate<GameObject>(prefab, transform);
             var view = go.GetComponent<PlayerView>();
@@ -110,6 +109,7 @@ public class FieldView : MonoBehaviour
     private void onDeathPlayer(Player player)
     {
         var item = players.Find(n => n.player.Equals(player));
+        Debug.Log($"Player: {player}");
         players.Remove(item);
         item.OnPlayerDeath();
     }
