@@ -8,6 +8,7 @@ public class Bomb
     public float spawnTimestamp;
     public float explosionTimestamp;
 
+    public bool isReady = false;
     public int power = 1;
 
     public Bomb(DBBomb data, int power, Vector2 pos)
@@ -22,6 +23,11 @@ public class Bomb
 
     public bool IsReady()
     {
-        return Time.time >= explosionTimestamp;
+        return Time.time >= explosionTimestamp || isReady;
+    }
+
+    public void SetReady()
+    {
+        isReady = true;
     }
 }

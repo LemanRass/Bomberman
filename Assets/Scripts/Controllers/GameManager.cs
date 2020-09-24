@@ -301,43 +301,6 @@ public class GameManager : MonoBehaviour
             if (HandleDestruction(pos))
                 break;
         }
-
-        bool HandleDestruction(Vector2 pos)
-        {
-            var type = GetCellType(pos);
-
-            switch(type)
-            {
-                case CellType.Bomb:
-                    //var bomb =
-                    //Explode bomb
-                    return true;
-
-                case CellType.Brick:
-                    var brick = bricks.Find(n => n.pos.Equals(pos));
-                    bricks.Remove(brick);
-                    onBrickDestroyed?.Invoke(brick);
-                    return true;
-
-                case CellType.Player:
-                    //var player ...
-                    //Destroy player
-                    return false;
-
-                case CellType.PowerUp:
-                    //var powerUp ...
-                    //Destroy powerUp
-                    return false;
-
-                case CellType.Empty:
-                    onExplosion?.Invoke(ExplosionType.Basic, pos);
-                    return false;
-
-                default:
-
-                    return true;
-            }
-        }
     }
 
     #endregion
@@ -372,6 +335,43 @@ public class GameManager : MonoBehaviour
             return CellType.Bomb;
 
         return CellType.Empty;
+    }
+
+    public bool HandleDestruction(Vector2 pos)
+    {
+        var type = GetCellType(pos);
+
+        switch (type)
+        {
+            case CellType.Bomb:
+                var bomb = bombs.Find(n => n.pos.Equals(pos));
+                bomb.SetReady();
+                return true;
+
+            case CellType.Brick:
+                var brick = bricks.Find(n => n.pos.Equals(pos));
+                bricks.Remove(brick);
+                onBrickDestroyed?.Invoke(brick);
+                return true;
+
+            case CellType.Player:
+                //var player ...
+                //Destroy player
+                return false;
+
+            case CellType.PowerUp:
+                //var powerUp ...
+                //Destroy powerUp
+                return false;
+
+            case CellType.Empty:
+                onExplosion?.Invoke(ExplosionType.Basic, pos);
+                return false;
+
+            default:
+
+                return true;
+        }
     }
 
     #endregion
