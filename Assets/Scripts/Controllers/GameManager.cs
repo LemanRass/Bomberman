@@ -320,7 +320,7 @@ public class GameManager : MonoBehaviour
             return CellType.Outside;
         }
 
-        if (players.Any(n => n.pos.ToRound().Equals(rounded)))
+        if (players.Any(n => Vector2.Distance(n.pos, pos) < 0.98f))
             return CellType.Player;
 
         if (powerUps.Any(n => n.pos.ToRound().Equals(rounded)))
@@ -356,9 +356,10 @@ public class GameManager : MonoBehaviour
                 return true;
 
             case CellType.Player:
-                var player = players.Find(n => n.pos.ToRound().Equals(pos.ToRound()));
+                var player = players.Find(n => Vector2.Distance(n.pos, pos) < 0.98f);
                 players.Remove(player);
                 onDeathPlayer?.Invoke(player);
+                onExplosion?.Invoke(ExplosionType.Basic, pos);
                 return false;
 
             case CellType.PowerUp:
