@@ -505,6 +505,8 @@ MonoBehaviour:
     prefab: Players/1/Player_1
   - name: Green Player
     prefab: Players/2/Player_2
+  - name: Purple Player
+    prefab: Players/3/Player_3
   bombs:
   - name: Basic Bomb
     icon: Icons/Bombs/1

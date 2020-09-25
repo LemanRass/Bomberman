@@ -2,8 +2,8 @@
 {
     public static float CalcMoveSpeed(Player player)
     {
-        float defaultSpeed = 1.0f;
-        float koefSpeed = 1.1f;
+        float defaultSpeed = 1.5f;
+        float koefSpeed = 0.1f;
 
         return defaultSpeed + player.powerUps.Count(PowerUPType.MOVE_SPEED) * koefSpeed;
     }

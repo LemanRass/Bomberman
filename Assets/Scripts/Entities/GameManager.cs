@@ -20,13 +20,11 @@ public class GameManager : MonoBehaviour
     public static GameManager instance { get; private set; }
     private void Awake() => instance = this;
 
-    public Vector2Int FIELD_SIZE;
 
     [Range(0, 100)]
     public int BRICKS_DENSITY = 90;
     [Range(0, 100)]
     public int POWERUP_DENSITY = 50;
-    public float PLAYER_SPEED = 2.0f;
 
     public Ground ground;
     public List<Block> blocks = new List<Block>();
@@ -89,11 +87,11 @@ public class GameManager : MonoBehaviour
 
         var blockData = Database.instance.blocks.First();
 
-        for (int y = 0; y < FIELD_SIZE.y; y++)
+        for (int y = 0; y < Constants.FIELD_SIZE_Y; y++)
         {
-            for (int x = 0; x < FIELD_SIZE.x; x++)
+            for (int x = 0; x < Constants.FIELD_SIZE_X; x++)
             {
-                if (y == 0 || y == FIELD_SIZE.y - 1)
+                if (y == 0 || y == Constants.FIELD_SIZE_Y - 1)
                 {
                     blocks.Add(new Block(blockData, new Vector2(x, y)));
                     continue;
@@ -101,7 +99,7 @@ public class GameManager : MonoBehaviour
 
                 if ((y % 2) != 0)
                 {
-                    if (x == 0 || x == FIELD_SIZE.x - 1)
+                    if (x == 0 || x == Constants.FIELD_SIZE_X - 1)
                     {
                         blocks.Add(new Block(blockData, new Vector2(x, y)));
                     }
@@ -121,15 +119,15 @@ public class GameManager : MonoBehaviour
     {
         bricks = new List<Brick>();
 
-        int count = Mathf.FloorToInt(FIELD_SIZE.x * FIELD_SIZE.y - (blocks.Count + players.Count * (Constants.FIELD_CELL_SIZE * 3)));
+        int count = Mathf.FloorToInt(Constants.FIELD_SIZE_X * Constants.FIELD_SIZE_Y - (blocks.Count + players.Count * (Constants.FIELD_CELL_SIZE * 3)));
         int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
 
         var brickData = Database.instance.bricks.First();
 
         while (bricksCount > 0)
         {
-            int x = UnityEngine.Random.Range(0, FIELD_SIZE.x);
-            int y = UnityEngine.Random.Range(0, FIELD_SIZE.y);
+            int x = UnityEngine.Random.Range(0, Constants.FIELD_SIZE_X);
+            int y = UnityEngine.Random.Range(0, Constants.FIELD_SIZE_Y);
             var pos = new Vector2(x, y);
 
             var cell = GetCellType(pos);
@@ -171,17 +169,17 @@ public class GameManager : MonoBehaviour
     {
         players = new List<Player>();
 
-        var firstPlayerData = Database.instance.players.First();
-        players.Add(new Player(0, firstPlayerData, new Vector2(1, 1), false));
+        var firstPlayerData = Database.instance.players[0];
+        players.Add(new Player(0, firstPlayerData, Constants.botLeftSpawnPoint, false));
 
-        var secondPlayerData = Database.instance.players.Last();
-        players.Add(new Player(1, secondPlayerData, new Vector2(1, FIELD_SIZE.y - 2), false));
+        var secondPlayerData = Database.instance.players[1];
+        players.Add(new Player(2, secondPlayerData, Constants.topLeftSpawnPoint, true));
 
-        var thirdPlayerData = Database.instance.players.Last();
-        players.Add(new Player(2, thirdPlayerData, new Vector2(FIELD_SIZE.x - 2, 1), true));
+        var thirdPlayerData = Database.instance.players[2];
+        players.Add(new Player(1, thirdPlayerData, Constants.topRightSpawnPoint, false));
 
-        var fourthPlayerData = Database.instance.players.Last();
-        players.Add(new Player(3, fourthPlayerData, new Vector2(FIELD_SIZE.x - 2, FIELD_SIZE.y - 2), true));
+        var fourthPlayerData = Database.instance.players[1];
+        players.Add(new Player(3, fourthPlayerData, Constants.botRightSpawnPoint, true));
     }
 
     private void InitBombs()
@@ -191,8 +189,8 @@ public class GameManager : MonoBehaviour
 
     public void InitCamera()
     {
-        float x = FIELD_SIZE.x / 2 * -1;
-        float z = FIELD_SIZE.y / 2;
+        float x = Constants.FIELD_SIZE_X / 2 * -1;
+        float z = Constants.FIELD_SIZE_Y / 2;
         float y = Mathf.Abs(x) + Mathf.Abs(z);
 
         Camera.main.transform.position = new Vector3(x, y, z);
@@ -206,7 +204,7 @@ public class GameManager : MonoBehaviour
     public void MovePlayer(int id, Vector2 dir)
     {
         var player = players.Find(n => n.id.Equals(id));
-        var nextPos = player.pos + (dir * PLAYER_SPEED * Time.deltaTime);
+        var nextPos = player.pos + (dir * player.moveSpeed * Time.deltaTime);
         
         //Works for spheres
         foreach(var block in blocks)
@@ -321,8 +319,8 @@ public class GameManager : MonoBehaviour
     {
         var rounded = pos.ToRound();
 
-        if (pos.x < 0 || pos.x >= FIELD_SIZE.x ||
-            pos.y < 0 || pos.y >= FIELD_SIZE.y)
+        if (pos.x < 0 || pos.x >= Constants.FIELD_SIZE_X ||
+            pos.y < 0 || pos.y >= Constants.FIELD_SIZE_Y)
         {
             return CellType.Outside;
         }

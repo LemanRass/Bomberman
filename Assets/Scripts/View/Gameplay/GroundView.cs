@@ -8,8 +8,8 @@ public class GroundView : MonoBehaviour
     {
         this.ground = ground;
 
-        float scaleX = GameManager.instance.FIELD_SIZE.x;
-        float scaleZ = GameManager.instance.FIELD_SIZE.y;
+        float scaleX = Constants.FIELD_SIZE_X;
+        float scaleZ = Constants.FIELD_SIZE_Y;
         transform.localScale = new Vector3(scaleX, 0.1f, scaleZ);
 
         float posX = (scaleX - 1.0f) / 2 * -1.0f;
