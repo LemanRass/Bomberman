@@ -12,6 +12,52 @@ public class PlayerView : MonoBehaviour
         transform.localPosition = new Vector3(-player.pos.x, 0.5f, player.pos.y);
     }
 
+    private void Update()
+    {
+        if (player.isAI)
+        {
+            AIController();
+        }
+        else
+        {
+            PlayerController();
+        }
+    }
+
+    private void PlayerController()
+    {
+        if (Input.GetKey(Settings.instance.playersKeyMap[player.id].MOVE_UP))
+        {
+            GameManager.instance.MovePlayer(player.id, new Vector2(0, 1.0f));
+        }
+
+        if (Input.GetKey(Settings.instance.playersKeyMap[player.id].MOVE_LEFT))
+        {
+            GameManager.instance.MovePlayer(player.id, new Vector2(1.0f, 0));
+        }
+
+        if (Input.GetKey(Settings.instance.playersKeyMap[player.id].MOVE_DOWN))
+        {
+            GameManager.instance.MovePlayer(player.id, new Vector2(0, -1.0f));
+        }
+
+        if (Input.GetKey(Settings.instance.playersKeyMap[player.id].MOVE_RIGHT))
+        {
+            GameManager.instance.MovePlayer(player.id, new Vector2(-1.0f, 0));
+        }
+
+        if (Input.GetKeyDown(Settings.instance.playersKeyMap[player.id].PLANT_BOMB))
+        {
+            var bombData = Database.instance.bombs.First();
+            GameManager.instance.SpawnBomb(bombData, 3, player.pos.ToRound());
+        }
+    }
+
+    private void AIController()
+    {
+
+    }
+
     public void OnPlayerMoved()
     {
         transform.localPosition = new Vector3(player.pos.x * -1, transform.localPosition.y, player.pos.y);
@@ -22,37 +68,5 @@ public class PlayerView : MonoBehaviour
         //Some death things
         //animation, sound, etc
         Destroy(gameObject);
-    }
-
-    private void Update()
-    {
-        if (!player.isLocal)
-            return;
-
-        if(Input.GetKey(KeyCode.UpArrow))
-        {
-            GameManager.instance.MovePlayer(player.id, new Vector2(0, 1.0f));
-        }
-
-        if(Input.GetKey(KeyCode.LeftArrow))
-        {
-            GameManager.instance.MovePlayer(player.id, new Vector2(1.0f, 0));
-        }
-
-        if(Input.GetKey(KeyCode.DownArrow))
-        {
-            GameManager.instance.MovePlayer(player.id, new Vector2(0, -1.0f));
-        }
-
-        if(Input.GetKey(KeyCode.RightArrow))
-        {
-            GameManager.instance.MovePlayer(player.id, new Vector2(-1.0f, 0));
-        }
-
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            var bombData = Database.instance.bombs.First();
-            GameManager.instance.SpawnBomb(bombData, 3, player.pos.ToRound());
-        }
     }
 }
