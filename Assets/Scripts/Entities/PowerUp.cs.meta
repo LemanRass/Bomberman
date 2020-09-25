@@ -1,11 +1,18 @@
-fileFormatVersion: 2
-guid: 974b28dc168a4014bb4ac3c2ad300ca4
-MonoImporter:
-  externalObjects: {}
-  serializedVersion: 2
-  defaultReferences: []
-  executionOrder: 0
-  icon: {instanceID: 0}
-  userData: 
-  assetBundleName: 
-  assetBundleVariant: 
+﻿using UnityEngine;
+
+public class PowerUP
+{
+    public DBPowerUP data;
+    public Vector2 pos;
+
+    public PowerUp(DBPowerUP data, Vector2 pos)
+    {
+        this.data = data;
+        this.pos = pos;
+    }
+
+    public override string ToString()
+    {
+        return $"[PowerUp] Type: {data.type} Position ({pos.x}, {pos.y}).";
+    }
+}

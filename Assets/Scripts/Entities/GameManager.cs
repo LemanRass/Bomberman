@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
     public Ground ground;
     public List<Block> blocks = new List<Block>();
     public List<Brick> bricks = new List<Brick>();
-    public List<PowerUp> powerUps = new List<PowerUp>();
+    public List<PowerUP> powerUPs = new List<PowerUP>();
     public List<Player> players = new List<Player>();
     public List<Bomb> bombs = new List<Bomb>();
 
@@ -145,24 +145,29 @@ public class GameManager : MonoBehaviour
     //Execute only after bricks init
     private void InitPowerUps()
     {
-        powerUps = new List<PowerUp>();
+        powerUPs = new List<PowerUP>();
 
         int powerUpCount = Mathf.RoundToInt(bricks.Count * (POWERUP_DENSITY / 100.0f));
         Debug.Log($"Power Ups Count: {powerUpCount}");
 
-        /*while(powerUpCount > 0)
-        {
-            var brick = bricks.Random();
+        var emptyBricks = new List<Brick>(bricks);
 
-            if (powerUps.Any(n => n.pos.Equals(brick.pos)))
-                continue;
+        while(powerUpCount > 0)
+        {
+            var brick = emptyBricks.Random();
+            emptyBricks.Remove(brick);
+
+            //if (powerUps.Any(n => n.pos.Equals(brick.pos)))
+            //    continue;
 
             int powerUpNum = UnityEngine.Random.Range(0, Database.instance.powerUps.Count);
             var powerUpData = Database.instance.powerUps[powerUpNum];
 
-            powerUps.Add(new PowerUp(powerUpData.type, brick.pos));
+            powerUPs.Add(new PowerUP(powerUpData, brick.pos));
             powerUpCount--;
-        }*/
+        }
+
+        Debug.Log($"Total powerUPs: {powerUPs.Count}");
     }
 
     private void InitPlayers()
@@ -328,14 +333,14 @@ public class GameManager : MonoBehaviour
         if (players.Any(n => Vector2.Distance(n.pos, pos) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
-        if (powerUps.Any(n => n.pos.ToRound().Equals(rounded)))
-            return CellType.PowerUp;
-
         if (blocks.Any(n => n.pos.ToRound().Equals(rounded)))
             return CellType.Block;
 
         if (bricks.Any(n => n.pos.ToRound().Equals(rounded)))
             return CellType.Brick;
+
+        if (powerUPs.Any(n => n.pos.ToRound().Equals(rounded)))
+            return CellType.PowerUp;
 
         if (bombs.Any(n => n.pos.ToRound().Equals(rounded)))
             return CellType.Bomb;

@@ -1,25 +1,18 @@
 ﻿using UnityEngine;
 
-public enum PowerUPType
+public class PowerUP
 {
-    EXPLOSION_SIZE,
-    EXTRA_BOMB,
-    MOVE_SPEED
-}
-
-public class PowerUp
-{
-    public PowerUPType type;
+    public DBPowerUP data;
     public Vector2 pos;
 
-    public PowerUp(PowerUPType type, Vector2 pos)
+    public PowerUP(DBPowerUP data, Vector2 pos)
     {
-        this.type = type;
+        this.data = data;
         this.pos = pos;
     }
 
     public override string ToString()
     {
-        return $"[PowerUp] Type: {type} Position ({pos.x}, {pos.y}).";
+        return $"[PowerUp] Type: {data.type} Position ({pos.x}, {pos.y}).";
     }
 }

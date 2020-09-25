@@ -3,10 +3,17 @@ using UnityEngine;
 
 public class FieldView : MonoBehaviour
 {
+    [HideInInspector]
     public GroundView ground;
+    [HideInInspector]
     public List<BlockView> blocks;
+    [HideInInspector]
     public List<BrickView> bricks;
+    [HideInInspector]
+    public List<PowerUPView> powerUPs;
+    [HideInInspector]
     public List<PlayerView> players;
+    [HideInInspector]
     public List<BombView> bombs;
 
     private void Start()
@@ -26,6 +33,7 @@ public class FieldView : MonoBehaviour
         InitBricks();
         InitGround();
         InitPlayers();
+        InitPowerUPs();
 
         bombs = new List<BombView>();
 
@@ -67,6 +75,20 @@ public class FieldView : MonoBehaviour
             var view = go.GetComponent<BrickView>();
             view.Init(brick);
             bricks.Add(view);
+        }
+    }
+
+    private void InitPowerUPs()
+    {
+        powerUPs = new List<PowerUPView>();
+
+        foreach(var powerUP in GameManager.instance.powerUPs)
+        {
+            var prefab = Resources.Load<GameObject>(powerUP.data.prefab);
+            var go = Instantiate<GameObject>(prefab, transform);
+            var view = go.GetComponent<PowerUPView>();
+            view.Init(powerUP);
+            powerUPs.Add(view);
         }
     }
 
