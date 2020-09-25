@@ -153,6 +153,7 @@ MonoBehaviour:
   ground: {fileID: 0}
   blocks: []
   bricks: []
+  powerUPs: []
   players: []
   bombs: []
 --- !u!4 &443292811
@@ -496,15 +497,15 @@ MonoBehaviour:
     prefab: Explosions/2/Prefab
   powerUps:
   - name: Speed up!
-    prefab: PowerUPs/1/PowerUP_1_Prefab
+    prefab: PowerUPs/3/PowerUP_3_Prefab
     icon: {fileID: 2800000, guid: 8e448b137ead94f8db4bfa8f3aafebcb, type: 3}
     type: 2
   - name: More damage!
-    prefab: PowerUPs/2/PowerUP_2_Prefab
+    prefab: PowerUPs/1/PowerUP_1_Prefab
     icon: {fileID: 2800000, guid: fb7d2bbf91e434cff917805849af7c52, type: 3}
     type: 0
   - name: Extra bomb!
-    prefab: PowerUPs/3/PowerUP_3_Prefab
+    prefab: PowerUPs/2/PowerUP_2_Prefab
     icon: {fileID: 2800000, guid: 0905f40014a2946db9b5cc2a01f1fc4d, type: 3}
     type: 1
   players:

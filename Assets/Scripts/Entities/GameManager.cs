@@ -39,6 +39,8 @@ public class GameManager : MonoBehaviour
     public Action<Bomb> onBombSpawned = null;
     public Action<Bomb> onBombRemoved = null;
     public Action<Brick> onBrickDestroyed = null;
+    public Action<PowerUP> onPowerUPPicked = null;
+    public Action<PowerUP> onPowerUPDestroyed = null;
     public Action<ExplosionType, Vector2> onExplosion = null;
 
     private void Start()
@@ -241,6 +243,17 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        //Works for spheres
+        var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < Constants.MOVE_COLLISION_DIST);
+        for(int i = 0; i < powers.Count; i++)
+        {
+            player.PickUpPowerUp(powers[i].data.type);
+            powerUPs.Remove(powers[i]);
+
+            Debug.Log($"Pick up {powers[i].data.type}");
+            onPowerUPPicked?.Invoke(powers[i]);
+        }
+
         player.pos = nextPos;
         onMovePlayer?.Invoke(player);
     }
@@ -330,6 +343,9 @@ public class GameManager : MonoBehaviour
             return CellType.Outside;
         }
 
+        if (bombs.Any(n => n.pos.ToRound().Equals(rounded)))
+            return CellType.Bomb;
+
         if (players.Any(n => Vector2.Distance(n.pos, pos) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
@@ -341,9 +357,6 @@ public class GameManager : MonoBehaviour
 
         if (powerUPs.Any(n => n.pos.ToRound().Equals(rounded)))
             return CellType.PowerUp;
-
-        if (bombs.Any(n => n.pos.ToRound().Equals(rounded)))
-            return CellType.Bomb;
 
         return CellType.Empty;
     }
@@ -373,8 +386,9 @@ public class GameManager : MonoBehaviour
                 return false;
 
             case CellType.PowerUp:
-                //var powerUp ...
-                //Destroy powerUp
+                var powerUp = powerUPs.Find(n => n.pos.Equals(pos));
+                powerUPs.Remove(powerUp);
+                onPowerUPDestroyed?.Invoke(powerUp);
                 return false;
 
             case CellType.Empty:
