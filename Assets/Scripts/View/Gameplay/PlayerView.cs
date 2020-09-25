@@ -22,34 +22,61 @@ public class PlayerView : MonoBehaviour
         {
             PlayerController();
         }
+
+
+        //Test
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            if (player.id == 0)
+            {
+                player.PickUpPowerUp(PowerUPType.MOVE_SPEED);
+                Debug.Log($"Pickd up speed powerUP ({player.powerUps.data[PowerUPType.MOVE_SPEED]}).");
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if (player.id == 0)
+            {
+                player.PickUpPowerUp(PowerUPType.EXTRA_BOMB);
+                Debug.Log($"Pickd up extra bomb powerUP ({player.powerUps.data[PowerUPType.EXTRA_BOMB]}).");
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            if (player.id == 0)
+            {
+                player.PickUpPowerUp(PowerUPType.EXPLOSION_SIZE);
+                Debug.Log($"Pickd up explosion size powerUP ({player.powerUps.data[PowerUPType.EXPLOSION_SIZE]}).");
+            }
+        }
     }
 
     private void PlayerController()
     {
         if (Input.GetKey(Settings.instance.playersKeyMap[player.id].MOVE_UP))
         {
-            GameManager.instance.MovePlayer(player.id, new Vector2(0, 1.0f));
+            GameManager.instance.MovePlayer(player.id, new Vector2(0, player.moveSpeed));
         }
 
         if (Input.GetKey(Settings.instance.playersKeyMap[player.id].MOVE_LEFT))
         {
-            GameManager.instance.MovePlayer(player.id, new Vector2(1.0f, 0));
+            GameManager.instance.MovePlayer(player.id, new Vector2(player.moveSpeed, 0));
         }
 
         if (Input.GetKey(Settings.instance.playersKeyMap[player.id].MOVE_DOWN))
         {
-            GameManager.instance.MovePlayer(player.id, new Vector2(0, -1.0f));
+            GameManager.instance.MovePlayer(player.id, new Vector2(0, -player.moveSpeed));
         }
 
         if (Input.GetKey(Settings.instance.playersKeyMap[player.id].MOVE_RIGHT))
         {
-            GameManager.instance.MovePlayer(player.id, new Vector2(-1.0f, 0));
+            GameManager.instance.MovePlayer(player.id, new Vector2(-player.moveSpeed, 0));
         }
 
         if (Input.GetKeyDown(Settings.instance.playersKeyMap[player.id].PLANT_BOMB))
         {
             var bombData = Database.instance.bombs.First();
-            GameManager.instance.SpawnBomb(bombData, 3, player.pos.ToRound());
+            GameManager.instance.SpawnBomb(bombData, player, player.pos.ToRound());
         }
     }
 
@@ -57,6 +84,9 @@ public class PlayerView : MonoBehaviour
     {
 
     }
+
+
+    #region Callbacks
 
     public void OnPlayerMoved()
     {
@@ -69,4 +99,6 @@ public class PlayerView : MonoBehaviour
         //animation, sound, etc
         Destroy(gameObject);
     }
+
+    #endregion
 }

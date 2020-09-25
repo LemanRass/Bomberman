@@ -3,7 +3,8 @@
 public enum PowerUPType
 {
     EXPLOSION_SIZE,
-    EXTRA_BOMB
+    EXTRA_BOMB,
+    MOVE_SPEED
 }
 
 public class PowerUp

@@ -2,6 +2,7 @@
 
 public class Bomb
 {
+    public Player owner;
     public DBBomb data;
     public Vector2 pos;
 
@@ -11,11 +12,12 @@ public class Bomb
     public bool isReady = false;
     public int power = 1;
 
-    public Bomb(DBBomb data, int power, Vector2 pos)
+    public Bomb(DBBomb data, Player owner, Vector2 pos)
     {
         this.data = data;
         this.pos = pos;
-        this.power = power;
+        this.owner = owner;
+        this.power = owner.powerLimit;
 
         spawnTimestamp = Time.time;
         explosionTimestamp = spawnTimestamp + data.delay;

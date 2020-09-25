@@ -496,7 +496,10 @@ MonoBehaviour:
     prefab: Explosions/1/Prefab
   - type: 1
     prefab: Explosions/2/Prefab
-  powerUps: []
+  powerUps:
+  - name: 
+    icon: {fileID: 0}
+    type: 2
   players:
   - name: Blue Player
     prefab: Players/1/Player_1

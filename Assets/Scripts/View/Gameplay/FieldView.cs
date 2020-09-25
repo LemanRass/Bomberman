@@ -109,7 +109,6 @@ public class FieldView : MonoBehaviour
     private void onDeathPlayer(Player player)
     {
         var item = players.Find(n => n.player.Equals(player));
-        Debug.Log($"Player: {player}");
         players.Remove(item);
         item.OnPlayerDeath();
     }

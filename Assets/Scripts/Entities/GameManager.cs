@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviour
     {
         bricks = new List<Brick>();
 
-        int count = FIELD_SIZE.x * FIELD_SIZE.y - (blocks.Count + players.Count * 3);
+        int count = Mathf.FloorToInt(FIELD_SIZE.x * FIELD_SIZE.y - (blocks.Count + players.Count * (Constants.FIELD_CELL_SIZE * 3)));
         int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
 
         var brickData = Database.instance.bricks.First();
@@ -136,7 +136,7 @@ public class GameManager : MonoBehaviour
             if (cell != CellType.Empty)
                 continue;
 
-            if (players.Any(n => Vector2.Distance(n.pos, pos) < 2.0f))
+            if (players.Any(n => Vector2.Distance(n.pos, pos) < Constants.FIELD_CELL_SIZE * 2))
                 continue;
 
             bricks.Add(new Brick(brickData, pos));
@@ -211,30 +211,30 @@ public class GameManager : MonoBehaviour
         //Works for spheres
         foreach(var block in blocks)
         {
-            if (Vector3.Distance(block.pos, nextPos) < 0.98f)
+            if (Vector3.Distance(block.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
             {
-                nextPos = block.pos + (nextPos - block.pos).normalized * 0.98f;
+                nextPos = block.pos + (nextPos - block.pos).normalized * Constants.MOVE_COLLISION_DIST;
             }
         }
 
         //Works for spheres
         foreach (var brick in bricks)
         {
-            if (Vector3.Distance(brick.pos, nextPos) < 0.98f)
+            if (Vector3.Distance(brick.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
             {
-                nextPos = brick.pos + (nextPos - brick.pos).normalized * 0.98f;
+                nextPos = brick.pos + (nextPos - brick.pos).normalized * Constants.MOVE_COLLISION_DIST;
             }
         }
 
         //Works for spheres
         foreach (var bomb in bombs)
         {
-            if (Vector3.Distance(bomb.pos, nextPos) < 0.98f)
+            if (Vector3.Distance(bomb.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
             {
-                if (Vector3.Distance(bomb.pos, player.pos) < 0.9f)
+                if (Vector3.Distance(bomb.pos, player.pos) <= Constants.MOVE_ON_BOMB_THRESHOLD)
                     continue;
 
-                nextPos = bomb.pos + (nextPos - bomb.pos).normalized * 0.98f;
+                nextPos = bomb.pos + (nextPos - bomb.pos).normalized * Constants.MOVE_COLLISION_DIST;
             }
         }
 
@@ -248,9 +248,16 @@ public class GameManager : MonoBehaviour
         onDeathPlayer?.Invoke(player);
     }
 
-    public void SpawnBomb(DBBomb dbBomb, int power, Vector2 pos)
+    public void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos)
     {
-        var bomb = new Bomb(dbBomb, power, pos);
+        int spawnedBombs = bombs.Count(n => n.owner.Equals(owner));
+        if(spawnedBombs >= owner.bombsLimit)
+        {
+            Debug.LogError($"Reached bombs limit ({spawnedBombs}/{owner.bombsLimit}).");
+            return;
+        }
+
+        var bomb = new Bomb(dbBomb, owner, pos);
         bombs.Add(bomb);
         onBombSpawned?.Invoke(bomb);
     }
@@ -320,7 +327,7 @@ public class GameManager : MonoBehaviour
             return CellType.Outside;
         }
 
-        if (players.Any(n => Vector2.Distance(n.pos, pos) < 0.98f))
+        if (players.Any(n => Vector2.Distance(n.pos, pos) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
         if (powerUps.Any(n => n.pos.ToRound().Equals(rounded)))
@@ -356,7 +363,7 @@ public class GameManager : MonoBehaviour
                 return true;
 
             case CellType.Player:
-                var player = players.Find(n => Vector2.Distance(n.pos, pos) < 0.98f);
+                var player = players.Find(n => Vector2.Distance(n.pos, pos) < Constants.EXPLOSION_AFFECT_DIST);
                 players.Remove(player);
                 onDeathPlayer?.Invoke(player);
                 onExplosion?.Invoke(ExplosionType.Basic, pos);
