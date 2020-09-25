@@ -22,33 +22,6 @@ public class PlayerView : MonoBehaviour
         {
             PlayerController();
         }
-
-
-        //Test
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            if (player.id == 0)
-            {
-                player.PickUpPowerUp(PowerUPType.MOVE_SPEED);
-                Debug.Log($"Pickd up speed powerUP ({player.powerUps.data[PowerUPType.MOVE_SPEED]}).");
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            if (player.id == 0)
-            {
-                player.PickUpPowerUp(PowerUPType.EXTRA_BOMB);
-                Debug.Log($"Pickd up extra bomb powerUP ({player.powerUps.data[PowerUPType.EXTRA_BOMB]}).");
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            if (player.id == 0)
-            {
-                player.PickUpPowerUp(PowerUPType.EXPLOSION_SIZE);
-                Debug.Log($"Pickd up explosion size powerUP ({player.powerUps.data[PowerUPType.EXPLOSION_SIZE]}).");
-            }
-        }
     }
 
     private void PlayerController()

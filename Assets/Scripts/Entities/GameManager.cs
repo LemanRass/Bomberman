@@ -244,7 +244,7 @@ public class GameManager : MonoBehaviour
         }
 
         //Works for spheres
-        var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < Constants.MOVE_COLLISION_DIST);
+        var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < Constants.PICK_UP_DIST);
         for(int i = 0; i < powers.Count; i++)
         {
             player.PickUpPowerUp(powers[i].data.type);
@@ -270,6 +270,12 @@ public class GameManager : MonoBehaviour
         if(spawnedBombs >= owner.bombsLimit)
         {
             Debug.LogError($"Reached bombs limit ({spawnedBombs}/{owner.bombsLimit}).");
+            return;
+        }
+
+        var cellType = GetCellType(pos);
+        if(cellType != CellType.Empty && cellType != CellType.Player)
+        {
             return;
         }
 
