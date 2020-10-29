@@ -429,11 +429,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BRICKS_DENSITY: 53
-  POWERUP_DENSITY: 100
-  ground:
-    data:
-      name: 
-      prefab: 
+  POWERUP_DENSITY: 50
 --- !u!4 &1554096836
 Transform:
   m_ObjectHideFlags: 0

@@ -2,8 +2,8 @@
 
 public static class Constants
 {
-    public static int FIELD_SIZE_X = 11;
-    public static int FIELD_SIZE_Y = 11;
+    public static int FIELD_SIZE_X = 13;
+    public static int FIELD_SIZE_Y = 13;
 
     public static float FIELD_CELL_SIZE = 1.0f;
     public static float EXPLOSION_AFFECT_DIST = 0.8f;

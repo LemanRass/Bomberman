@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 
 public enum CellType
 {
@@ -51,6 +51,11 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(0);
+        }
+
         if (bombs.Count > 0)
         {
             var forExplode = bombs.FindAll(n => n.IsReady());
@@ -150,7 +155,6 @@ public class GameManager : MonoBehaviour
         powerUPs = new List<PowerUP>();
 
         int powerUpCount = Mathf.RoundToInt(bricks.Count * (POWERUP_DENSITY / 100.0f));
-        Debug.Log($"Power Ups Count: {powerUpCount}");
 
         var emptyBricks = new List<Brick>(bricks);
 
@@ -159,17 +163,12 @@ public class GameManager : MonoBehaviour
             var brick = emptyBricks.Random();
             emptyBricks.Remove(brick);
 
-            //if (powerUps.Any(n => n.pos.Equals(brick.pos)))
-            //    continue;
-
             int powerUpNum = UnityEngine.Random.Range(0, Database.instance.powerUps.Count);
             var powerUpData = Database.instance.powerUps[powerUpNum];
 
             powerUPs.Add(new PowerUP(powerUpData, brick.pos));
             powerUpCount--;
         }
-
-        Debug.Log($"Total powerUPs: {powerUPs.Count}");
     }
 
     private void InitPlayers()
@@ -222,7 +221,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        //Works for spheres
         foreach (var brick in bricks)
         {
             if (Vector3.Distance(brick.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
@@ -231,7 +229,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        //Works for spheres
         foreach (var bomb in bombs)
         {
             if (Vector3.Distance(bomb.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
@@ -243,7 +240,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        //Works for spheres
         var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < Constants.PICK_UP_DIST);
         for(int i = 0; i < powers.Count; i++)
         {
@@ -269,7 +265,6 @@ public class GameManager : MonoBehaviour
         int spawnedBombs = bombs.Count(n => n.owner.Equals(owner));
         if(spawnedBombs >= owner.bombsLimit)
         {
-            Debug.LogError($"Reached bombs limit ({spawnedBombs}/{owner.bombsLimit}).");
             return;
         }
 
