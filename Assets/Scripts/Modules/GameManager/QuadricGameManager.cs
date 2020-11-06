@@ -1,57 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum CellType
+public class QuadricGameManager : GameManager
 {
-    Empty,
-    Player,
-    PowerUp,
-    Block,
-    Brick,
-    Bomb,
-    Outside
-}
-
-public class GameManager : MonoBehaviour
-{
-    public static GameManager instance { get; private set; }
-    private void Awake() => instance = this;
-
-
-    [Range(0, 100)]
-    public int BRICKS_DENSITY = 90;
-    [Range(0, 100)]
-    public int POWERUP_DENSITY = 50;
-
-    public Ground ground;
-    public List<Block> blocks = new List<Block>();
-    public List<Brick> bricks = new List<Brick>();
-    public List<PowerUP> powerUPs = new List<PowerUP>();
-    public List<Player> players = new List<Player>();
-    public List<Bomb> bombs = new List<Bomb>();
-
-    public Action onInitDone = null;
-    public Action<Player> onMovePlayer = null;
-    public Action<Player> onDeathPlayer = null;
-    public Action<Bomb> onBombSpawned = null;
-    public Action<Bomb> onBombRemoved = null;
-    public Action<Brick> onBrickDestroyed = null;
-    public Action<PowerUP> onPowerUPPicked = null;
-    public Action<PowerUP> onPowerUPDestroyed = null;
-    public Action<ExplosionType, Vector2> onExplosion = null;
-
-    private void Start()
+    protected override void Start()
     {
+        Debug.Log($"HEllo");
+
         Init();
         onInitDone?.Invoke();
     }
 
-    private void Update()
+    protected override void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             SceneManager.LoadScene(0);
         }
@@ -63,9 +27,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    #region Initialization
+    #region Init
 
-    public void Init()
+    protected override void Init()
     {
         InitGround();
 
@@ -82,17 +46,28 @@ public class GameManager : MonoBehaviour
         InitCamera();
     }
 
-    private void InitGround()
+    protected override void InitGround()
     {
-        var groundData = Database.instance.grounds.First();
-        ground = new Ground(groundData);
+        grounds = new List<Ground>();
+
+        var groundData = Database.instance.grounds.Last();
+
+        for(int x = 0; x < Constants.FIELD_SIZE_X; x++)
+        {
+            for(int y = 0; y < Constants.FIELD_SIZE_Y; y++)
+            {
+                grounds.Add(new Ground(groundData, new Vector2(x, y)));
+            }
+        }
+
+        Debug.Log("Init ground done!");
     }
 
-    private void InitBlocks()
+    protected override void InitBlocks()
     {
         blocks = new List<Block>();
 
-        var blockData = Database.instance.blocks.First();
+        var blockData = Database.instance.blocks.Last();
 
         for (int y = 0; y < Constants.FIELD_SIZE_Y; y++)
         {
@@ -122,7 +97,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void InitBricks()
+    protected override void InitBricks()
     {
         bricks = new List<Brick>();
 
@@ -149,8 +124,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //Execute only after bricks init
-    private void InitPowerUps()
+    protected override void InitPowerUps()
     {
         powerUPs = new List<PowerUP>();
 
@@ -158,7 +132,7 @@ public class GameManager : MonoBehaviour
 
         var emptyBricks = new List<Brick>(bricks);
 
-        while(powerUpCount > 0)
+        while (powerUpCount > 0)
         {
             var brick = emptyBricks.Random();
             emptyBricks.Remove(brick);
@@ -171,7 +145,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void InitPlayers()
+    protected override void InitPlayers()
     {
         players = new List<Player>();
 
@@ -188,12 +162,12 @@ public class GameManager : MonoBehaviour
         players.Add(new Player(3, fourthPlayerData, Constants.botRightSpawnPoint, true));
     }
 
-    private void InitBombs()
+    protected override void InitBombs()
     {
         bombs = new List<Bomb>();
     }
 
-    public void InitCamera()
+    protected override void InitCamera()
     {
         float x = Constants.FIELD_SIZE_X / 2 * -1;
         float z = Constants.FIELD_SIZE_Y / 2;
@@ -204,16 +178,15 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-
     #region Actions
 
-    public void MovePlayer(int id, Vector2 dir)
+    public override void MovePlayer(int id, Vector2 dir)
     {
         var player = players.Find(n => n.id.Equals(id));
         var nextPos = player.pos + (dir * player.moveSpeed * Time.deltaTime);
-        
+
         //Works for spheres
-        foreach(var block in blocks)
+        foreach (var block in blocks)
         {
             if (Vector3.Distance(block.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
             {
@@ -241,7 +214,7 @@ public class GameManager : MonoBehaviour
         }
 
         var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < Constants.PICK_UP_DIST);
-        for(int i = 0; i < powers.Count; i++)
+        for (int i = 0; i < powers.Count; i++)
         {
             player.PickUpPowerUp(powers[i].data.type);
             powerUPs.Remove(powers[i]);
@@ -254,22 +227,22 @@ public class GameManager : MonoBehaviour
         onMovePlayer?.Invoke(player);
     }
 
-    public void DeathPlayer(Player player)
+    public override void DeathPlayer(Player player)
     {
         players.Remove(player);
         onDeathPlayer?.Invoke(player);
     }
 
-    public void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos)
+    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos)
     {
         int spawnedBombs = bombs.Count(n => n.owner.Equals(owner));
-        if(spawnedBombs >= owner.bombsLimit)
+        if (spawnedBombs >= owner.bombsLimit)
         {
             return;
         }
 
         var cellType = GetCellType(pos);
-        if(cellType != CellType.Empty && cellType != CellType.Player)
+        if (cellType != CellType.Empty && cellType != CellType.Player)
         {
             return;
         }
@@ -279,12 +252,12 @@ public class GameManager : MonoBehaviour
         onBombSpawned?.Invoke(bomb);
     }
 
-    public void RemoveBomb(Bomb bomb)
+    public override void RemoveBomb(Bomb bomb)
     {
         onBombRemoved?.Invoke(bomb);
     }
 
-    public void ExplodeBomb(Bomb bomb)
+    public override void ExplodeBomb(Bomb bomb)
     {
         bombs.Remove(bomb);
         onBombRemoved?.Invoke(bomb);
@@ -296,7 +269,7 @@ public class GameManager : MonoBehaviour
 
 
         //Left
-        for(int x = bomb.pos.ToRoundInt().x - 1; x > bomb.pos.ToRoundInt().x - bomb.power; x--)
+        for (int x = bomb.pos.ToRoundInt().x - 1; x > bomb.pos.ToRoundInt().x - bomb.power; x--)
         {
             var pos = new Vector2(x, bomb.pos.y);
             if (HandleDestruction(pos))
@@ -304,7 +277,7 @@ public class GameManager : MonoBehaviour
         }
 
         //Right
-        for(int x = bomb.pos.ToRoundInt().x + 1; x < bomb.pos.ToRoundInt().x + bomb.power; x++)
+        for (int x = bomb.pos.ToRoundInt().x + 1; x < bomb.pos.ToRoundInt().x + bomb.power; x++)
         {
             var pos = new Vector2(x, bomb.pos.y);
             if (HandleDestruction(pos))
@@ -312,7 +285,7 @@ public class GameManager : MonoBehaviour
         }
 
         //Top
-        for(int y = bomb.pos.ToRoundInt().y + 1; y < bomb.pos.ToRoundInt().y + bomb.power; y++)
+        for (int y = bomb.pos.ToRoundInt().y + 1; y < bomb.pos.ToRoundInt().y + bomb.power; y++)
         {
             var pos = new Vector2(bomb.pos.x, y);
             if (HandleDestruction(pos))
@@ -320,7 +293,7 @@ public class GameManager : MonoBehaviour
         }
 
         //Bot
-        for(int y = bomb.pos.ToRoundInt().y - 1; y > bomb.pos.ToRoundInt().y - bomb.power; y--)
+        for (int y = bomb.pos.ToRoundInt().y - 1; y > bomb.pos.ToRoundInt().y - bomb.power; y--)
         {
             var pos = new Vector2(bomb.pos.x, y);
             if (HandleDestruction(pos))
@@ -330,11 +303,9 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-
-
     #region Tools
 
-    public CellType GetCellType(Vector2 pos)
+    public override CellType GetCellType(Vector2 pos)
     {
         var rounded = pos.ToRound();
 
@@ -362,7 +333,7 @@ public class GameManager : MonoBehaviour
         return CellType.Empty;
     }
 
-    public bool HandleDestruction(Vector2 pos)
+    public override bool HandleDestruction(Vector2 pos)
     {
         var type = GetCellType(pos);
 

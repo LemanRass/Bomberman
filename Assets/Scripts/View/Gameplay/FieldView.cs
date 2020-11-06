@@ -4,7 +4,7 @@ using UnityEngine;
 public class FieldView : MonoBehaviour
 {
     [HideInInspector]
-    public GroundView ground;
+    public List<GroundView> grounds;
     [HideInInspector]
     public List<BlockView> blocks;
     [HideInInspector]
@@ -44,12 +44,16 @@ public class FieldView : MonoBehaviour
 
     private void InitGround()
     {
-        var ground = GameManager.instance.ground;
-        var prefab = Resources.Load<GameObject>(ground.data.prefab);
-        var go = Instantiate<GameObject>(prefab, transform);
-        var view = go.GetComponent<GroundView>();
-        view.Init(ground);
-        this.ground = view;
+        grounds = new List<GroundView>();
+
+        foreach (var ground in GameManager.instance.grounds)
+        {
+            var prefab = Resources.Load<GameObject>(ground.data.prefab);
+            var go = Instantiate<GameObject>(prefab, transform);
+            var view = go.GetComponent<GroundView>();
+            view.Init(ground);
+            grounds.Add(view);
+        }
     }
 
     private void InitBlocks()
