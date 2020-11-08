@@ -38,7 +38,7 @@ public class QuadricGameManager : GameManager
     {
         grounds = new List<Ground>();
 
-        var groundData = Database.instance.grounds.Last();
+        var groundData = Database.instance.grounds.First();
 
         for(int x = 0; x < Constants.FIELD_SIZE_X; x++)
         {
@@ -213,6 +213,7 @@ public class QuadricGameManager : GameManager
         }
 
         player.pos = nextPos;
+        player.coords = nextPos.ToRoundInt();
         onMovePlayer?.Invoke(player);
     }
 
@@ -236,7 +237,7 @@ public class QuadricGameManager : GameManager
             return;
         }
 
-        var bomb = new Bomb(dbBomb, owner, coords, new Vector2());
+        var bomb = new Bomb(dbBomb, owner, coords, coords);
         bombs.Add(bomb);
         onBombSpawned?.Invoke(bomb);
     }
@@ -258,7 +259,7 @@ public class QuadricGameManager : GameManager
 
 
         //Left
-        for (int x = bomb.pos.ToRoundInt().x - 1; x > bomb.pos.ToRoundInt().x - bomb.power; x--)
+        for (int x = bomb.coords.x - 1; x > bomb.coords.x - bomb.power; x--)
         {
             var coords = new Vector2Int(x, bomb.coords.y);
             if (HandleDestruction(coords))
@@ -266,7 +267,7 @@ public class QuadricGameManager : GameManager
         }
 
         //Right
-        for (int x = bomb.pos.ToRoundInt().x + 1; x < bomb.pos.ToRoundInt().x + bomb.power; x++)
+        for (int x = bomb.coords.x + 1; x < bomb.coords.x + bomb.power; x++)
         {
             var coords = new Vector2Int(x, bomb.coords.y);
             if (HandleDestruction(coords))
@@ -274,7 +275,7 @@ public class QuadricGameManager : GameManager
         }
 
         //Top
-        for (int y = bomb.pos.ToRoundInt().y + 1; y < bomb.pos.ToRoundInt().y + bomb.power; y++)
+        for (int y = bomb.coords.y + 1; y < bomb.coords.y + bomb.power; y++)
         {
             var coords = new Vector2Int(bomb.coords.x, y);
             if (HandleDestruction(coords))
@@ -282,7 +283,7 @@ public class QuadricGameManager : GameManager
         }
 
         //Bot
-        for (int y = bomb.pos.ToRoundInt().y - 1; y > bomb.pos.ToRoundInt().y - bomb.power; y--)
+        for (int y = bomb.coords.y - 1; y > bomb.coords.y - bomb.power; y--)
         {
             var coords = new Vector2Int(bomb.coords.x, y);
             if (HandleDestruction(coords))
@@ -305,7 +306,7 @@ public class QuadricGameManager : GameManager
         if (bombs.Any(n => n.coords.Equals(coords)))
             return CellType.Bomb;
 
-        if (players.Any(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST))
+        if (players.Any(n => Vector2.Distance(n.coords, coords) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
         if (blocks.Any(n => n.coords.Equals(coords)))
