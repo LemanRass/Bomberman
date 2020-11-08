@@ -49,13 +49,17 @@ public class FieldView : MonoBehaviour
     {
         grounds = new List<GroundView>();
 
-        foreach (var ground in GameManager.instance.grounds)
+        for(int x = 0; x < GameManager.instance.grounds.Length; x++)
         {
-            var prefab = Resources.Load<GameObject>(ground.data.prefab);
-            var go = Instantiate<GameObject>(prefab, transform);
-            var view = go.GetComponent<GroundView>();
-            view.Init(ground);
-            grounds.Add(view);
+            for(int y = 0; y < GameManager.instance.grounds[x].Length; y++)
+            {
+                var ground = GameManager.instance.grounds[x][y];
+                var prefab = Resources.Load<GameObject>(ground.data.prefab);
+                var go = Instantiate<GameObject>(prefab, transform);
+                var view = go.GetComponent<GroundView>();
+                view.Init(ground);
+                grounds.Add(view);
+            }
         }
     }
 

@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class QuadricGameManager : GameManager
 {
+    public const int FIELD_SIZE_X = 7;
+    public const int FIELD_SIZE_Y = 7;
+
     protected override void Update()
     {
         if (bombs.Count > 0)
@@ -36,19 +39,21 @@ public class QuadricGameManager : GameManager
 
     protected override void InitGround()
     {
-        grounds = new List<Ground>();
+        grounds = new Ground[FIELD_SIZE_X][];
+        for (int i = 0; i < grounds.Length; i++)
+            grounds[i] = new Ground[FIELD_SIZE_Y];
+
 
         var groundData = Database.instance.grounds.First();
 
-        for(int x = 0; x < Constants.FIELD_SIZE_X; x++)
+        for(int x = 0; x < FIELD_SIZE_X; x++)
         {
-            for(int y = 0; y < Constants.FIELD_SIZE_Y; y++)
+            for(int y = 0; y < FIELD_SIZE_Y; y++)
             {
-                grounds.Add(new Ground(groundData, new Vector2Int(x, y), new Vector2(x, y)));
+                var ground = new Ground(groundData, new Vector2Int(x, y), new Vector2(x, y));
+                grounds[x][y] = ground;
             }
         }
-
-        Debug.Log("Init ground done!");
     }
 
     protected override void InitBlocks()
@@ -57,11 +62,11 @@ public class QuadricGameManager : GameManager
 
         var blockData = Database.instance.blocks.Last();
 
-        for (int y = 0; y < Constants.FIELD_SIZE_Y; y++)
+        for (int y = 0; y < FIELD_SIZE_Y; y++)
         {
-            for (int x = 0; x < Constants.FIELD_SIZE_X; x++)
+            for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if (y == 0 || y == Constants.FIELD_SIZE_Y - 1)
+                if (y == 0 || y == FIELD_SIZE_Y - 1)
                 {
                     blocks.Add(new Block(blockData, new Vector2Int(x, y), new Vector2(x, y)));
                     continue;
@@ -69,7 +74,7 @@ public class QuadricGameManager : GameManager
 
                 if ((y % 2) != 0)
                 {
-                    if (x == 0 || x == Constants.FIELD_SIZE_X - 1)
+                    if (x == 0 || x == FIELD_SIZE_X - 1)
                     {
                         blocks.Add(new Block(blockData, new Vector2Int(x, y), new Vector2(x, y)));
                     }
@@ -89,15 +94,16 @@ public class QuadricGameManager : GameManager
     {
         bricks = new List<Brick>();
 
-        int count = Mathf.FloorToInt(Constants.FIELD_SIZE_X * Constants.FIELD_SIZE_Y - (blocks.Count + players.Count * (Constants.FIELD_CELL_SIZE * 3)));
+        int count = Mathf.FloorToInt(FIELD_SIZE_X * FIELD_SIZE_Y - (blocks.Count + players.Count * (Constants.FIELD_CELL_SIZE * 3)));
         int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
 
         var brickData = Database.instance.bricks.First();
 
         while (bricksCount > 0)
         {
-            int x = UnityEngine.Random.Range(0, Constants.FIELD_SIZE_X);
-            int y = UnityEngine.Random.Range(0, Constants.FIELD_SIZE_Y);
+            int x = Random.Range(0, FIELD_SIZE_X);
+            int y = Random.Range(0, FIELD_SIZE_Y);
+
             var pos = new Vector2(x, y);
             var coords = new Vector2Int(x, y);
 
@@ -139,16 +145,16 @@ public class QuadricGameManager : GameManager
         players = new List<Player>();
 
         var firstPlayerData = Database.instance.players[0];
-        players.Add(new Player(0, firstPlayerData, Constants.botLeftSpawnPoint, false));
+        players.Add(new Player(0, firstPlayerData, new Vector2(FIELD_SIZE_X - 2, 1), false));
 
         var secondPlayerData = Database.instance.players[1];
-        players.Add(new Player(2, secondPlayerData, Constants.topLeftSpawnPoint, true));
+        players.Add(new Player(2, secondPlayerData, new Vector2(FIELD_SIZE_X - 2, FIELD_SIZE_Y - 2), true));
 
         var thirdPlayerData = Database.instance.players[2];
-        players.Add(new Player(1, thirdPlayerData, Constants.topRightSpawnPoint, false));
+        players.Add(new Player(1, thirdPlayerData, new Vector2(1, FIELD_SIZE_Y - 2), false));
 
         var fourthPlayerData = Database.instance.players[1];
-        players.Add(new Player(3, fourthPlayerData, Constants.botRightSpawnPoint, true));
+        players.Add(new Player(3, fourthPlayerData, new Vector2(1, 1), true));
     }
 
     protected override void InitBombs()
@@ -158,8 +164,8 @@ public class QuadricGameManager : GameManager
 
     protected override void InitCamera()
     {
-        float x = Constants.FIELD_SIZE_X / 2 * -1;
-        float z = Constants.FIELD_SIZE_Y / 2;
+        float x = FIELD_SIZE_X / 2 * -1;
+        float z = FIELD_SIZE_Y / 2;
         float y = Mathf.Abs(x) + Mathf.Abs(z);
 
         Camera.main.transform.position = new Vector3(x, y, z);
@@ -213,7 +219,7 @@ public class QuadricGameManager : GameManager
         }
 
         player.pos = nextPos;
-        player.coords = nextPos.ToRoundInt();
+        //player.coords = nextPos.ToRoundInt();
         onMovePlayer?.Invoke(player);
     }
 
@@ -223,7 +229,7 @@ public class QuadricGameManager : GameManager
         onDeathPlayer?.Invoke(player);
     }
 
-    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2Int coords)
+    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos)
     {
         int spawnedBombs = bombs.Count(n => n.owner.Equals(owner));
         if (spawnedBombs >= owner.bombsLimit)
@@ -231,13 +237,13 @@ public class QuadricGameManager : GameManager
             return;
         }
 
-        var cellType = GetCellType(coords);
+        var cellType = GetCellType(pos.ToRoundInt());
         if (cellType != CellType.Empty && cellType != CellType.Player)
         {
             return;
         }
 
-        var bomb = new Bomb(dbBomb, owner, coords, coords);
+        var bomb = new Bomb(dbBomb, owner, pos.ToRoundInt(), pos.ToRoundInt()); //TODO: Get the nearest cell for bomb
         bombs.Add(bomb);
         onBombSpawned?.Invoke(bomb);
     }
@@ -297,8 +303,8 @@ public class QuadricGameManager : GameManager
 
     public override CellType GetCellType(Vector2Int coords)
     {
-        if (coords.x < 0 || coords.x >= Constants.FIELD_SIZE_X ||
-            coords.y < 0 || coords.y >= Constants.FIELD_SIZE_Y)
+        if (coords.x < 0 || coords.x >= FIELD_SIZE_X ||
+            coords.y < 0 || coords.y >= FIELD_SIZE_Y)
         {
             return CellType.Outside;
         }
@@ -306,7 +312,7 @@ public class QuadricGameManager : GameManager
         if (bombs.Any(n => n.coords.Equals(coords)))
             return CellType.Bomb;
 
-        if (players.Any(n => Vector2.Distance(n.coords, coords) < Constants.EXPLOSION_AFFECT_DIST))
+        if (players.Any(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
         if (blocks.Any(n => n.coords.Equals(coords)))

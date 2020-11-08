@@ -5,7 +5,6 @@ public class Player
     public int id;
     public DBPlayer data;
     public Vector2 pos;
-    public Vector2Int coords;
     public bool isAI;
 
     public float moveSpeed

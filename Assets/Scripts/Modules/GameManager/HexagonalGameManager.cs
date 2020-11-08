@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class HexagonalGameManager : GameManager
 {
-    public const int maxSize = 7;
-    public const int minSize = 4;
+    public const int maxSize = 11;
+    public const int minSize = 6;
 
     public const float verticalOffset = 0.78f;
     public const float horizontalOffset = 1.0f;
 
+
+    
 
     protected override void Update()
     {
@@ -24,15 +26,16 @@ public class HexagonalGameManager : GameManager
 
     public override void Init()
     {
+        grounds = new Ground[(maxSize - minSize) * 2 + 1][];
+
         InitGround();
-
-        InitBricks();
-
-        /*InitBlocks();
 
         InitPlayers();
 
-        
+        InitBricks();
+
+
+        /*InitBlocks();
 
         InitPowerUps();
 
@@ -45,7 +48,6 @@ public class HexagonalGameManager : GameManager
 
     protected override void InitGround()
     {
-        grounds = new List<Ground>();
         var groundData = Database.instance.grounds.Last();
 
         int rowsCount = (maxSize - minSize) * 2 + 1;
@@ -58,9 +60,12 @@ public class HexagonalGameManager : GameManager
         {
             float ox = (count - 1) * horizontalOffset / 2;
 
+            grounds[i] = new Ground[count];
+
             for (int j = 0; j < count; j++)
             {
-                grounds.Add(new Ground(groundData, new Vector2Int(j, i), new Vector2(-j + ox, oy)));
+                var ground = new Ground(groundData, new Vector2Int(j, i), new Vector2(-j + ox, oy));
+                grounds[i][j] = ground;
             }
 
             if (i >= rowsCount / 2)
@@ -79,6 +84,11 @@ public class HexagonalGameManager : GameManager
             oy -= verticalOffset;
             //return;
         }
+
+        for(int i = 0; i < grounds.Length; i++)
+        {
+            Debug.Log($"{grounds[i].Length}");
+        }
     }
 
     protected override void InitBlocks()
@@ -93,31 +103,44 @@ public class HexagonalGameManager : GameManager
     {
         var brickData = Database.instance.bricks.Last();
 
-
         int count = grounds.Count();
         int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
 
-
         while (bricksCount > 0)
         {
-            var ground = grounds.Random();
+            var randomRow = grounds.Random();
+            var ground = randomRow.Random();
 
             var cell = GetCellType(ground.coords);
             if (cell != CellType.Empty)
                 continue;
 
-            //if (players.Any(n => Vector2.Distance(n.pos, pos) < Constants.FIELD_CELL_SIZE * 2))
-            //    continue;
+            if (players.Any(n => Vector2.Distance(n.pos, ground.pos) <= 1.0f))
+                continue;
 
             bricks.Add(new Brick(brickData, ground.coords, ground.pos));
             bricksCount--;
         }
-        //bricks.Add(new Brick(brickData, grounds.Random().pos));
     }
 
     protected override void InitPowerUps() { }
 
-    protected override void InitPlayers() { }
+    protected override void InitPlayers()
+    {
+        players = new List<Player>();
+
+        var firstPlayerData = Database.instance.players[0];
+        players.Add(new Player(0, firstPlayerData, grounds[0][0].pos, false));
+
+        var secondPlayerData = Database.instance.players[1];
+        players.Add(new Player(2, secondPlayerData, grounds[grounds.Length - 1][0].pos, true));
+
+        var thirdPlayerData = Database.instance.players[2];
+        players.Add(new Player(1, thirdPlayerData, grounds[0][grounds[0].Length - 1].pos, false));
+
+        var fourthPlayerData = Database.instance.players[1];
+        players.Add(new Player(3, fourthPlayerData, grounds[grounds.Length - 1][grounds[grounds.Length - 1].Length - 1].pos, true));
+    }
 
     protected override void InitBombs() { }
 
@@ -133,7 +156,7 @@ public class HexagonalGameManager : GameManager
 
     public override void DeathPlayer(Player player) { }
 
-    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2Int coords) { }
+    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos) { }
 
     public override void RemoveBomb(Bomb bomb) { }
 
@@ -149,6 +172,9 @@ public class HexagonalGameManager : GameManager
     {
         if (bricks.Any(n => n.coords.Equals(coords)))
             return CellType.Brick;
+
+        if (players.Any(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST))
+            return CellType.Player;
 
         return CellType.Empty;
     }

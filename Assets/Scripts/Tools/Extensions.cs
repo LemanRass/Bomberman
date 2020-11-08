@@ -43,6 +43,11 @@ public static class Extensions
         return list[UnityEngine.Random.Range(0, list.Count)];
     }
 
+    public static T Random<T>(this T[] array)
+    {
+        return array[UnityEngine.Random.Range(0, array.Length)];
+    }
+
     public static void Reset(this Transform transform)
     {
         transform.localPosition = Vector3.zero;

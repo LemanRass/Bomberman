@@ -408,7 +408,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1554096836}
-  - component: {fileID: 1554096837}
+  - component: {fileID: 1554096835}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -416,6 +416,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1554096835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554096834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf7e93788f44e4f7da71701198911890, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BRICKS_DENSITY: 45
+  POWERUP_DENSITY: 50
 --- !u!4 &1554096836
 Transform:
   m_ObjectHideFlags: 0
@@ -430,21 +444,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1554096837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1554096834}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7906bb2c2a98408aa5153cf2930b4be, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BRICKS_DENSITY: 90
-  POWERUP_DENSITY: 50
-  grounds: []
 --- !u!1 &1575485163
 GameObject:
   m_ObjectHideFlags: 0
