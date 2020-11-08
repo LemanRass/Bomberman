@@ -1,25 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class QuadricGameManager : GameManager
 {
-    protected override void Start()
-    {
-        Debug.Log($"HEllo");
-
-        Init();
-        onInitDone?.Invoke();
-    }
-
     protected override void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            SceneManager.LoadScene(0);
-        }
-
         if (bombs.Count > 0)
         {
             var forExplode = bombs.FindAll(n => n.IsReady());
@@ -29,7 +15,7 @@ public class QuadricGameManager : GameManager
 
     #region Init
 
-    protected override void Init()
+    public override void Init()
     {
         InitGround();
 
@@ -44,6 +30,8 @@ public class QuadricGameManager : GameManager
         InitBombs();
 
         InitCamera();
+
+        onInitDone?.Invoke();
     }
 
     protected override void InitGround()
@@ -56,7 +44,7 @@ public class QuadricGameManager : GameManager
         {
             for(int y = 0; y < Constants.FIELD_SIZE_Y; y++)
             {
-                grounds.Add(new Ground(groundData, new Vector2(x, y)));
+                grounds.Add(new Ground(groundData, new Vector2Int(x, y), new Vector2(x, y)));
             }
         }
 
@@ -75,7 +63,7 @@ public class QuadricGameManager : GameManager
             {
                 if (y == 0 || y == Constants.FIELD_SIZE_Y - 1)
                 {
-                    blocks.Add(new Block(blockData, new Vector2(x, y)));
+                    blocks.Add(new Block(blockData, new Vector2Int(x, y), new Vector2(x, y)));
                     continue;
                 }
 
@@ -83,14 +71,14 @@ public class QuadricGameManager : GameManager
                 {
                     if (x == 0 || x == Constants.FIELD_SIZE_X - 1)
                     {
-                        blocks.Add(new Block(blockData, new Vector2(x, y)));
+                        blocks.Add(new Block(blockData, new Vector2Int(x, y), new Vector2(x, y)));
                     }
                 }
                 else
                 {
                     if ((x % 2) == 0)
                     {
-                        blocks.Add(new Block(blockData, new Vector2(x, y)));
+                        blocks.Add(new Block(blockData, new Vector2Int(x, y), new Vector2(x, y)));
                     }
                 }
             }
@@ -111,15 +99,16 @@ public class QuadricGameManager : GameManager
             int x = UnityEngine.Random.Range(0, Constants.FIELD_SIZE_X);
             int y = UnityEngine.Random.Range(0, Constants.FIELD_SIZE_Y);
             var pos = new Vector2(x, y);
+            var coords = new Vector2Int(x, y);
 
-            var cell = GetCellType(pos);
+            var cell = GetCellType(coords);
             if (cell != CellType.Empty)
                 continue;
 
             if (players.Any(n => Vector2.Distance(n.pos, pos) < Constants.FIELD_CELL_SIZE * 2))
                 continue;
 
-            bricks.Add(new Brick(brickData, pos));
+            bricks.Add(new Brick(brickData, new Vector2Int(x, y), pos));
             bricksCount--;
         }
     }
@@ -140,7 +129,7 @@ public class QuadricGameManager : GameManager
             int powerUpNum = UnityEngine.Random.Range(0, Database.instance.powerUps.Count);
             var powerUpData = Database.instance.powerUps[powerUpNum];
 
-            powerUPs.Add(new PowerUP(powerUpData, brick.pos));
+            powerUPs.Add(new PowerUP(powerUpData, brick.coords, brick.pos));
             powerUpCount--;
         }
     }
@@ -233,7 +222,7 @@ public class QuadricGameManager : GameManager
         onDeathPlayer?.Invoke(player);
     }
 
-    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos)
+    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2Int coords)
     {
         int spawnedBombs = bombs.Count(n => n.owner.Equals(owner));
         if (spawnedBombs >= owner.bombsLimit)
@@ -241,13 +230,13 @@ public class QuadricGameManager : GameManager
             return;
         }
 
-        var cellType = GetCellType(pos);
+        var cellType = GetCellType(coords);
         if (cellType != CellType.Empty && cellType != CellType.Player)
         {
             return;
         }
 
-        var bomb = new Bomb(dbBomb, owner, pos);
+        var bomb = new Bomb(dbBomb, owner, coords, new Vector2());
         bombs.Add(bomb);
         onBombSpawned?.Invoke(bomb);
     }
@@ -264,39 +253,39 @@ public class QuadricGameManager : GameManager
 
 
         //Center
-        onExplosion?.Invoke(ExplosionType.Basic, bomb.pos);
-        HandleDestruction(bomb.pos);
+        onExplosion?.Invoke(ExplosionType.Basic, bomb.coords);
+        HandleDestruction(bomb.coords);
 
 
         //Left
         for (int x = bomb.pos.ToRoundInt().x - 1; x > bomb.pos.ToRoundInt().x - bomb.power; x--)
         {
-            var pos = new Vector2(x, bomb.pos.y);
-            if (HandleDestruction(pos))
+            var coords = new Vector2Int(x, bomb.coords.y);
+            if (HandleDestruction(coords))
                 break;
         }
 
         //Right
         for (int x = bomb.pos.ToRoundInt().x + 1; x < bomb.pos.ToRoundInt().x + bomb.power; x++)
         {
-            var pos = new Vector2(x, bomb.pos.y);
-            if (HandleDestruction(pos))
+            var coords = new Vector2Int(x, bomb.coords.y);
+            if (HandleDestruction(coords))
                 break;
         }
 
         //Top
         for (int y = bomb.pos.ToRoundInt().y + 1; y < bomb.pos.ToRoundInt().y + bomb.power; y++)
         {
-            var pos = new Vector2(bomb.pos.x, y);
-            if (HandleDestruction(pos))
+            var coords = new Vector2Int(bomb.coords.x, y);
+            if (HandleDestruction(coords))
                 break;
         }
 
         //Bot
         for (int y = bomb.pos.ToRoundInt().y - 1; y > bomb.pos.ToRoundInt().y - bomb.power; y--)
         {
-            var pos = new Vector2(bomb.pos.x, y);
-            if (HandleDestruction(pos))
+            var coords = new Vector2Int(bomb.coords.x, y);
+            if (HandleDestruction(coords))
                 break;
         }
     }
@@ -305,66 +294,64 @@ public class QuadricGameManager : GameManager
 
     #region Tools
 
-    public override CellType GetCellType(Vector2 pos)
+    public override CellType GetCellType(Vector2Int coords)
     {
-        var rounded = pos.ToRound();
-
-        if (pos.x < 0 || pos.x >= Constants.FIELD_SIZE_X ||
-            pos.y < 0 || pos.y >= Constants.FIELD_SIZE_Y)
+        if (coords.x < 0 || coords.x >= Constants.FIELD_SIZE_X ||
+            coords.y < 0 || coords.y >= Constants.FIELD_SIZE_Y)
         {
             return CellType.Outside;
         }
 
-        if (bombs.Any(n => n.pos.ToRound().Equals(rounded)))
+        if (bombs.Any(n => n.coords.Equals(coords)))
             return CellType.Bomb;
 
-        if (players.Any(n => Vector2.Distance(n.pos, pos) < Constants.EXPLOSION_AFFECT_DIST))
+        if (players.Any(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
-        if (blocks.Any(n => n.pos.ToRound().Equals(rounded)))
+        if (blocks.Any(n => n.coords.Equals(coords)))
             return CellType.Block;
 
-        if (bricks.Any(n => n.pos.ToRound().Equals(rounded)))
+        if (bricks.Any(n => n.coords.Equals(coords)))
             return CellType.Brick;
 
-        if (powerUPs.Any(n => n.pos.ToRound().Equals(rounded)))
+        if (powerUPs.Any(n => n.coords.Equals(coords)))
             return CellType.PowerUp;
 
         return CellType.Empty;
     }
 
-    public override bool HandleDestruction(Vector2 pos)
+    public override bool HandleDestruction(Vector2Int coords)
     {
-        var type = GetCellType(pos);
+        var type = GetCellType(coords);
 
         switch (type)
         {
             case CellType.Bomb:
-                var bomb = bombs.Find(n => n.pos.Equals(pos));
+                var bomb = bombs.Find(n => n.pos.Equals(coords));
                 bomb.SetReady();
                 return true;
 
             case CellType.Brick:
-                var brick = bricks.Find(n => n.pos.Equals(pos));
+                var brick = bricks.Find(n => n.pos.Equals(coords));
                 bricks.Remove(brick);
                 onBrickDestroyed?.Invoke(brick);
                 return true;
 
             case CellType.Player:
-                var player = players.Find(n => Vector2.Distance(n.pos, pos) < Constants.EXPLOSION_AFFECT_DIST);
+                var player = players.Find(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST);
                 players.Remove(player);
                 onDeathPlayer?.Invoke(player);
-                onExplosion?.Invoke(ExplosionType.Basic, pos);
+                onExplosion?.Invoke(ExplosionType.Basic, coords);
                 return false;
 
             case CellType.PowerUp:
-                var powerUp = powerUPs.Find(n => n.pos.Equals(pos));
+                var powerUp = powerUPs.Find(n => n.pos.Equals(coords));
                 powerUPs.Remove(powerUp);
                 onPowerUPDestroyed?.Invoke(powerUp);
                 return false;
 
             case CellType.Empty:
-                onExplosion?.Invoke(ExplosionType.Basic, pos);
+                onExplosion?.Invoke(ExplosionType.Basic, coords);
                 return false;
 
             default:

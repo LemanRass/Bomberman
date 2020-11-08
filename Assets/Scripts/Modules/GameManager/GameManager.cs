@@ -30,13 +30,11 @@ public abstract class GameManager : MonoBehaviour
     public Action<PowerUP> onPowerUPDestroyed = null;
     public Action<ExplosionType, Vector2> onExplosion = null;
 
-    protected abstract void Start();
-
     protected abstract void Update();
 
     #region Initialization
 
-    protected abstract void Init();
+    public abstract void Init();
 
     protected abstract void InitGround();
 
@@ -62,7 +60,7 @@ public abstract class GameManager : MonoBehaviour
 
     public abstract void DeathPlayer(Player player);
 
-    public abstract void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos);
+    public abstract void SpawnBomb(DBBomb dbBomb, Player owner, Vector2Int coords);
 
     public abstract void RemoveBomb(Bomb bomb);
 
@@ -74,9 +72,9 @@ public abstract class GameManager : MonoBehaviour
 
     #region Tools
 
-    public abstract CellType GetCellType(Vector2 pos);
+    public abstract CellType GetCellType(Vector2Int coords);
 
-    public abstract bool HandleDestruction(Vector2 pos);
+    public abstract bool HandleDestruction(Vector2Int coords);
 
     #endregion
 }

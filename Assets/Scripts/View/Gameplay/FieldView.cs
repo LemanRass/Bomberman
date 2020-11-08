@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class FieldView : MonoBehaviour
 {
+    public static FieldView instance { get; private set; }
+    private void Awake() => instance = this;
+
     [HideInInspector]
     public List<GroundView> grounds;
     [HideInInspector]
@@ -16,7 +19,7 @@ public class FieldView : MonoBehaviour
     [HideInInspector]
     public List<BombView> bombs;
 
-    private void Start()
+    public void Init()
     {
         GameManager.instance.onInitDone += onInit;
         GameManager.instance.onBombSpawned += onSpawnBomb;
@@ -31,9 +34,9 @@ public class FieldView : MonoBehaviour
 
     private void onInit()
     {
+        InitGrounds();
         InitBlocks();
         InitBricks();
-        InitGround();
         InitPlayers();
         InitPowerUPs();
 
@@ -42,7 +45,7 @@ public class FieldView : MonoBehaviour
         GameManager.instance.onInitDone -= onInit;
     }
 
-    private void InitGround()
+    private void InitGrounds()
     {
         grounds = new List<GroundView>();
 

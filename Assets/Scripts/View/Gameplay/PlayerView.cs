@@ -49,7 +49,7 @@ public class PlayerView : MonoBehaviour
         if (Input.GetKeyDown(Settings.instance.playersKeyMap[player.id].PLANT_BOMB))
         {
             var bombData = Database.instance.bombs.First();
-            GameManager.instance.SpawnBomb(bombData, player, player.pos.ToRound());
+            GameManager.instance.SpawnBomb(bombData, player, player.coords);
         }
     }
 
