@@ -199,11 +199,35 @@ public class HexagonalGameManager : GameManager
 
     public override void DeathPlayer(Player player) { }
 
-    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos) { }
+    public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos)
+    {
+        int spawnedBombs = bombs.Count(n => n.owner.Equals(owner));
+        if (spawnedBombs >= owner.bombsLimit)
+        {
+            return;
+        }
 
-    public override void RemoveBomb(Bomb bomb) { }
+        //var cellType = GetCellType(pos.ToRoundInt());
+        //if (cellType != CellType.Empty && cellType != CellType.Player)
+        //{
+        //    return;
+        //}
 
-    public override void ExplodeBomb(Bomb bomb) { }
+        var bomb = new Bomb(dbBomb, owner, pos.ToRoundInt(), pos); //TODO: Get the nearest cell for bomb
+        bombs.Add(bomb);
+        onBombSpawned?.Invoke(bomb);
+    }
+
+    public override void RemoveBomb(Bomb bomb)
+    {
+        bombs.Remove(bomb);
+        onBombRemoved?.Invoke(bomb);
+    }
+
+    public override void ExplodeBomb(Bomb bomb)
+    {
+        RemoveBomb(bomb);
+    }
 
     #endregion
 
