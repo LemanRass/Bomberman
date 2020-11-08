@@ -11,7 +11,7 @@ public class HexagonalGameManager : GameManager
     public const float horizontalOffset = 1.0f;
 
 
-    
+    public const float MOVE_COLLISION_DIST = 0.8f;
 
     protected override void Update()
     {
@@ -30,14 +30,15 @@ public class HexagonalGameManager : GameManager
 
         InitGround();
 
+        InitBlocks();
+
         InitPlayers();
 
         InitBricks();
 
 
-        /*InitBlocks();
 
-        InitPowerUps();
+        /*InitPowerUps();
 
         InitBombs();
 
@@ -96,7 +97,23 @@ public class HexagonalGameManager : GameManager
         blocks = new List<Block>();
 
         var blockData = Database.instance.blocks.Last();
-        
+        for(int x = 0; x < grounds.Length; x++)
+        {
+            for(int y = 0; y < grounds[x].Length; y++)
+            {
+                if(x == 0 || x == grounds.Length - 1)
+                {
+                    blocks.Add(new Block(blockData, new Vector2Int(x, y), grounds[x][y].pos));
+                }
+                else
+                {
+                    if (y == 0 || y == grounds[x].Length - 1)
+                    {
+                        blocks.Add(new Block(blockData, new Vector2Int(x, y), grounds[x][y].pos));
+                    }
+                }
+            }
+        }
     }
 
     protected override void InitBricks()
@@ -130,19 +147,22 @@ public class HexagonalGameManager : GameManager
         players = new List<Player>();
 
         var firstPlayerData = Database.instance.players[0];
-        players.Add(new Player(0, firstPlayerData, grounds[0][0].pos, false));
+        players.Add(new Player(0, firstPlayerData, grounds[1][1].pos, false));
 
         var secondPlayerData = Database.instance.players[1];
-        players.Add(new Player(2, secondPlayerData, grounds[grounds.Length - 1][0].pos, true));
+        players.Add(new Player(2, secondPlayerData, grounds[grounds.Length - 2][1].pos, true));
 
         var thirdPlayerData = Database.instance.players[2];
-        players.Add(new Player(1, thirdPlayerData, grounds[0][grounds[0].Length - 1].pos, false));
+        players.Add(new Player(1, thirdPlayerData, grounds[1][grounds[1].Length - 2].pos, false));
 
         var fourthPlayerData = Database.instance.players[1];
-        players.Add(new Player(3, fourthPlayerData, grounds[grounds.Length - 1][grounds[grounds.Length - 1].Length - 1].pos, true));
+        players.Add(new Player(3, fourthPlayerData, grounds[grounds.Length - 2][grounds[grounds.Length - 2].Length - 2].pos, true));
     }
 
-    protected override void InitBombs() { }
+    protected override void InitBombs()
+    {
+        bombs = new List<Bomb>();
+    }
 
     protected override void InitCamera() { }
 
@@ -152,7 +172,30 @@ public class HexagonalGameManager : GameManager
 
     #region Actions
 
-    public override void MovePlayer(int id, Vector2 dir) { }
+    public override void MovePlayer(int id, Vector2 dir)
+    {
+        var player = players.Find(n => n.id.Equals(id));
+        var nextPos = player.pos + (dir * player.moveSpeed * Time.deltaTime);
+
+        foreach (var block in blocks)
+        {
+            if (Vector3.Distance(block.pos, nextPos) < MOVE_COLLISION_DIST)
+            {
+                nextPos = block.pos + (nextPos - block.pos).normalized * MOVE_COLLISION_DIST;
+            }
+        }
+
+        foreach (var brick in bricks)
+        {
+            if (Vector3.Distance(brick.pos, nextPos) < MOVE_COLLISION_DIST)
+            {
+                nextPos = brick.pos + (nextPos - brick.pos).normalized * MOVE_COLLISION_DIST;
+            }
+        }
+
+        player.pos = nextPos;
+        onMovePlayer?.Invoke(player);
+    }
 
     public override void DeathPlayer(Player player) { }
 
@@ -170,11 +213,15 @@ public class HexagonalGameManager : GameManager
 
     public override CellType GetCellType(Vector2Int coords)
     {
+        
+
         if (bricks.Any(n => n.coords.Equals(coords)))
             return CellType.Brick;
 
         if (players.Any(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
+
+
 
         return CellType.Empty;
     }

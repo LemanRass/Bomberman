@@ -48,6 +48,19 @@ public static class Extensions
         return array[UnityEngine.Random.Range(0, array.Length)];
     }
 
+    public static List<T> ToList<T>(this T[][] array)
+    {
+        var result = new List<T>();
+        for(int i = 0; i < array.Length; i++)
+        {
+            for(int j = 0; j < array[i].Length; j++)
+            {
+                result.Add(array[i][j]);
+            }
+        }
+        return result;
+    }
+
     public static void Reset(this Transform transform)
     {
         transform.localPosition = Vector3.zero;

@@ -14,7 +14,6 @@ public abstract class GameManager : MonoBehaviour
 
     [HideInInspector]
     public Ground[][] grounds;
-    //public List<Ground> grounds = new List<Ground>();
     [HideInInspector]
     public List<Block> blocks = new List<Block>();
     [HideInInspector]

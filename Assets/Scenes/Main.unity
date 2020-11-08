@@ -524,6 +524,8 @@ MonoBehaviour:
   blocks:
   - name: Basic Block
     prefab: Blocks/1/Block_1
+  - name: Hexagonal Block
+    prefab: Blocks/hexagon/Block_2
   bricks:
   - name: Basic Brick
     prefab: Bricks/1/Brick_1
