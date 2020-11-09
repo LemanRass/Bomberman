@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class BombView : MonoBehaviour
 {
-    [HideInInspector]
     public Bomb bomb;
 
     public float minScale;
@@ -20,7 +19,7 @@ public class BombView : MonoBehaviour
     public void Init(Bomb bomb)
     {
         this.bomb = bomb;
-        transform.localPosition = new Vector3(-bomb.pos.x, 0.1f, bomb.pos.y);
+        transform.localPosition = new Vector3(bomb.pos.x, 0.1f, bomb.pos.y);
 
         //GFX
         fireObject = Instantiate<GameObject>(firePrefab);

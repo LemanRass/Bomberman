@@ -14,6 +14,7 @@ public class HexagonalGameManager : GameManager
     public const float MOVE_COLLISION_DIST = 0.8f;
     public const float MOVE_ON_BOMB_THRESHOLD = 0.78f;
     public const float EXPLOSION_AFFECT_DIST = 0.6f;
+    public const float PICK_UP_DIST = 0.6f;
 
     protected override void Update()
     {
@@ -40,9 +41,9 @@ public class HexagonalGameManager : GameManager
 
         InitBombs();
 
-        /*InitPowerUps();
+        InitPowerUps();
 
-        InitCamera();*/
+        InitCamera();
 
         onInitDone?.Invoke();
     }
@@ -116,7 +117,6 @@ public class HexagonalGameManager : GameManager
 
         int count = grounds.ToList().Count();
         int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f) - blocks.Count - players.Count * 4);
-        Debug.Log($"Grounds count: {count} Bricks count: {bricksCount}");
         while (bricksCount > 0)
         {
             var randomRow = grounds.Random();
@@ -134,7 +134,26 @@ public class HexagonalGameManager : GameManager
         }
     }
 
-    protected override void InitPowerUps() { }
+    protected override void InitPowerUps()
+    {
+        powerUPs = new List<PowerUP>();
+
+        int powerUpCount = Mathf.RoundToInt(bricks.Count * (POWERUP_DENSITY / 100.0f));
+
+        var emptyBricks = new List<Brick>(bricks);
+
+        while (powerUpCount > 0)
+        {
+            var brick = emptyBricks.Random();
+            emptyBricks.Remove(brick);
+
+            int powerUpNum = Random.Range(0, Database.instance.powerUps.Count);
+            var powerUpData = Database.instance.powerUps[powerUpNum];
+
+            powerUPs.Add(new PowerUP(powerUpData, brick.coords, brick.pos));
+            powerUpCount--;
+        }
+    }
 
     protected override void InitPlayers()
     {
@@ -199,6 +218,19 @@ public class HexagonalGameManager : GameManager
 
                 nextPos = bomb.pos + (nextPos - bomb.pos).normalized * MOVE_COLLISION_DIST;
             }
+        }
+
+        var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < PICK_UP_DIST);
+        for (int i = 0; i < powers.Count; i++)
+        {
+            if (bricks.Any(n => n.coords.Equals(powers[i].coords)))
+                continue;
+
+            player.PickUpPowerUp(powers[i].data.type);
+            powerUPs.Remove(powers[i]);
+
+            Debug.Log($"Pick up {powers[i].data.type}");
+            onPowerUPPicked?.Invoke(powers[i]);
         }
 
         player.pos = nextPos;
@@ -287,8 +319,7 @@ public class HexagonalGameManager : GameManager
     public override bool HandleDestruction(Ground ground)
     {
         var type = GetGroundType(ground);
-        Debug.Log($"Type: {type}");
-
+        //Debug.Log($"Type: {type}");
 
         switch (type)
         {
@@ -305,6 +336,13 @@ public class HexagonalGameManager : GameManager
                 var brick = bricks.Find(n => n.coords.Equals(ground.coords));
                 bricks.Remove(brick);
                 onBrickDestroyed?.Invoke(brick);
+
+                //Show powerup if exists
+                var powerUp = powerUPs.Find(n => n.coords.Equals(ground.coords));
+                if(powerUp != null)
+                {
+                    onPowerUpSpawned?.Invoke(powerUp);
+                }
                 return true;
 
             case CellType.Player:

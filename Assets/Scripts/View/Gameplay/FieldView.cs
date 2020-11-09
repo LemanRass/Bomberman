@@ -28,6 +28,7 @@ public class FieldView : MonoBehaviour
         GameManager.instance.onBrickDestroyed += onBrickDestroyed;
         GameManager.instance.onMovePlayer += onMovePlayer;
         GameManager.instance.onDeathPlayer += onDeathPlayer;
+        GameManager.instance.onPowerUpSpawned += onPowerUPSpawned;
         GameManager.instance.onPowerUPPicked += onPowerUPPicked;
         GameManager.instance.onPowerUPDestroyed += onPowerUPDestroyed;
     }
@@ -163,6 +164,12 @@ public class FieldView : MonoBehaviour
         var item = bricks.Find(n => n.brick.Equals(brick));
         bricks.Remove(item);
         Destroy(item.gameObject);
+    }
+
+    private void onPowerUPSpawned(PowerUP powerUP)
+    {
+        var item = powerUPs.Find(n => n.powerUP.Equals(powerUP));
+        item.gameObject.SetActive(true);
     }
 
     private void onPowerUPPicked(PowerUP powerUP)

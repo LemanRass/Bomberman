@@ -31,6 +31,7 @@ public abstract class GameManager : MonoBehaviour
     public Action<Bomb> onBombSpawned = null;
     public Action<Bomb> onBombRemoved = null;
     public Action<Brick> onBrickDestroyed = null;
+    public Action<PowerUP> onPowerUpSpawned = null;
     public Action<PowerUP> onPowerUPPicked = null;
     public Action<PowerUP> onPowerUPDestroyed = null;
     public Action<ExplosionType, Vector2> onExplosion = null;

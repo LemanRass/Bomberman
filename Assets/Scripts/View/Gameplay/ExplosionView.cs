@@ -9,7 +9,7 @@ public class ExplosionView : MonoBehaviour
 
     public void Explode(Vector2 pos)
     {
-        transform.localPosition = new Vector3(-pos.x, 0, pos.y);
+        transform.localPosition = new Vector3(pos.x, 0, pos.y);
         explosion = Instantiate<GameObject>(prefab, transform);
         Invoke("SelfDestroy", duration);
     }

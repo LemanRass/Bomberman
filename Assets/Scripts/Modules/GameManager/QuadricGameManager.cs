@@ -133,7 +133,7 @@ public class QuadricGameManager : GameManager
             var brick = emptyBricks.Random();
             emptyBricks.Remove(brick);
 
-            int powerUpNum = UnityEngine.Random.Range(0, Database.instance.powerUps.Count);
+            int powerUpNum = Random.Range(0, Database.instance.powerUps.Count);
             var powerUpData = Database.instance.powerUps[powerUpNum];
 
             powerUPs.Add(new PowerUP(powerUpData, brick.coords, brick.pos));

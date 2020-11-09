@@ -1,11 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
+[Serializable]
 public class Bomb
 {
     public Player owner;
     public DBBomb data;
-    public Vector2 pos;
     public Vector2Int coords;
+    public Vector2 pos;
 
     public float spawnTimestamp;
     public float explosionTimestamp;
@@ -16,8 +18,8 @@ public class Bomb
     public Bomb(DBBomb data, Player owner, Vector2Int coords, Vector2 pos)
     {
         this.data = data;
-        this.pos = pos;
         this.coords = coords;
+        this.pos = pos;
         this.owner = owner;
         this.power = owner.powerLimit;
 
