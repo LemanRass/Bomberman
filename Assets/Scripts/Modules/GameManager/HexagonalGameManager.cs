@@ -221,16 +221,20 @@ public class HexagonalGameManager : GameManager
         }
 
         var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < PICK_UP_DIST);
-        for (int i = 0; i < powers.Count; i++)
+        foreach(var power in powers)
         {
-            if (bricks.Any(n => n.coords.Equals(powers[i].coords)))
-                continue;
+            if(Vector3.Distance(power.pos, nextPos) < PICK_UP_DIST)
+            {
+                //Not available yet
+                if (bricks.Any(n => n.coords.Equals(power.coords)))
+                    continue;
 
-            player.PickUpPowerUp(powers[i].data.type);
-            powerUPs.Remove(powers[i]);
+                player.PickUpPowerUp(power.data.type);
+                powerUPs.Remove(power);
 
-            Debug.Log($"Pick up {powers[i].data.type}");
-            onPowerUPPicked?.Invoke(powers[i]);
+                Debug.Log($"Picked up {power.data.type}");
+                onPowerUPPicked?.Invoke(power);
+            }
         }
 
         player.pos = nextPos;
@@ -312,6 +316,9 @@ public class HexagonalGameManager : GameManager
         if (bombs.Any(n => n.coords.Equals(ground.coords)))
             return CellType.Bomb;
 
+        if (powerUPs.Any(n => n.coords.Equals(ground.coords)))
+            return CellType.PowerUp;
+
 
         return CellType.Empty;
     }
@@ -324,42 +331,54 @@ public class HexagonalGameManager : GameManager
         switch (type)
         {
             case CellType.Block:
+                {
 
+                }
                 return false;
 
             case CellType.Bomb:
-                var bomb = bombs.Find(n => n.coords.Equals(ground.coords));
-                bomb.SetReady();
+                {
+                    var bomb = bombs.Find(n => n.coords.Equals(ground.coords));
+                    bomb.SetReady();
+                }
                 return true;
 
             case CellType.Brick:
-                var brick = bricks.Find(n => n.coords.Equals(ground.coords));
-                bricks.Remove(brick);
-                onBrickDestroyed?.Invoke(brick);
-
-                //Show powerup if exists
-                var powerUp = powerUPs.Find(n => n.coords.Equals(ground.coords));
-                if(powerUp != null)
                 {
-                    onPowerUpSpawned?.Invoke(powerUp);
+                    var brick = bricks.Find(n => n.coords.Equals(ground.coords));
+                    bricks.Remove(brick);
+                    onBrickDestroyed?.Invoke(brick);
+
+                    //Show powerup if exists
+                    var powerUp = powerUPs.Find(n => n.coords.Equals(ground.coords));
+                    if (powerUp != null)
+                    {
+                        onPowerUpSpawned?.Invoke(powerUp);
+                    }
                 }
                 return true;
 
             case CellType.Player:
-                var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < EXPLOSION_AFFECT_DIST);
-                players.Remove(player);
-                onDeathPlayer?.Invoke(player);
-                onExplosion?.Invoke(ExplosionType.Basic, ground.pos);
+                {
+                    var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < EXPLOSION_AFFECT_DIST);
+                    players.Remove(player);
+                    onDeathPlayer?.Invoke(player);
+                    onExplosion?.Invoke(ExplosionType.Basic, ground.pos);
+                }
                 return false;
 
-            /*case CellType.PowerUp:
-                var powerUp = powerUPs.Find(n => n.pos.Equals(coords));
-                powerUPs.Remove(powerUp);
-                onPowerUPDestroyed?.Invoke(powerUp);
-                return false;*/
+            case CellType.PowerUp:
+                {
+                    var powerUp = powerUPs.Find(n => n.coords.Equals(ground.coords));
+                    powerUPs.Remove(powerUp);
+                    onPowerUPDestroyed?.Invoke(powerUp);
+                }
+                return false;
 
             case CellType.Empty:
-                onExplosion?.Invoke(ExplosionType.Basic, ground.pos);
+                {
+                    onExplosion?.Invoke(ExplosionType.Basic, ground.pos);
+                }
                 return false;
 
             default:
