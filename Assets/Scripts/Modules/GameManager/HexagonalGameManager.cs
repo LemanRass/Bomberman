@@ -12,6 +12,7 @@ public class HexagonalGameManager : GameManager
 
 
     public const float MOVE_COLLISION_DIST = 0.8f;
+    public const float MOVE_ON_BOMB_THRESHOLD = 0.78f;
 
     protected override void Update()
     {
@@ -191,6 +192,17 @@ public class HexagonalGameManager : GameManager
             }
         }
 
+        foreach (var bomb in bombs)
+        {
+            if (Vector3.Distance(bomb.pos, nextPos) < MOVE_COLLISION_DIST)
+            {
+                if (Vector3.Distance(bomb.pos, player.pos) <= MOVE_ON_BOMB_THRESHOLD)
+                    continue;
+
+                nextPos = bomb.pos + (nextPos - bomb.pos).normalized * MOVE_COLLISION_DIST;
+            }
+        }
+
         player.pos = nextPos;
         onMovePlayer?.Invoke(player);
     }
@@ -205,15 +217,15 @@ public class HexagonalGameManager : GameManager
             return;
         }
 
-        //var cellType = GetCellType(pos.ToRoundInt());
-        //if (cellType != CellType.Empty && cellType != CellType.Player)
-        //{
-        //    return;
-        //}
-        var nearest = FindNearestGround(pos);
-        var bomb = new Bomb(dbBomb, owner, pos.ToRoundInt(), nearest.First().pos); //TODO: Get the nearest cell for bomb
-        bombs.Add(bomb);
-        onBombSpawned?.Invoke(bomb);
+        var ground = FindNearestGround(pos).First();
+
+        var cellType = GetCellType(ground.coords);
+        if (cellType == CellType.Empty || cellType == CellType.Player)
+        {
+            var bomb = new Bomb(dbBomb, owner, ground.coords, ground.pos);
+            bombs.Add(bomb);
+            onBombSpawned?.Invoke(bomb);
+        }
     }
 
     public override void RemoveBomb(Bomb bomb)
@@ -229,9 +241,10 @@ public class HexagonalGameManager : GameManager
         var results = findAllGroundsInRange(bomb.pos, bomb.power);
         foreach(var result in results)
         {
-            Debug.Log($"{result.coords}");
-            if(HandleDestruction(result))
+            if (HandleDestruction(result))
+            {
                 onExplosion?.Invoke(ExplosionType.Basic, result.pos);
+            }
         }
     }
 
@@ -272,7 +285,6 @@ public class HexagonalGameManager : GameManager
     public override bool HandleDestruction(Ground ground)
     {
         var type = GetCellType(ground.coords);
-        Debug.Log($"{type}");
 
         switch (type)
         {
