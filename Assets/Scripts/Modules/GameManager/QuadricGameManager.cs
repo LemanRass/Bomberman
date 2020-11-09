@@ -6,6 +6,12 @@ public class QuadricGameManager : GameManager
 {
     public const int FIELD_SIZE_X = 11;
     public const int FIELD_SIZE_Y = 11;
+    public const float FIELD_CELL_SIZE = 1.0f;
+    public const float EXPLOSION_AFFECT_DIST = 0.8f;
+    public const float MOVE_COLLISION_DIST = 0.98f;
+    public const float MOVE_ON_BOMB_THRESHOLD = 0.979f;
+    public const float PICK_UP_DIST = 0.8f;
+
 
     protected override void Update()
     {
@@ -94,7 +100,7 @@ public class QuadricGameManager : GameManager
     {
         bricks = new List<Brick>();
 
-        int count = Mathf.FloorToInt(FIELD_SIZE_X * FIELD_SIZE_Y - (blocks.Count + players.Count * (Constants.FIELD_CELL_SIZE * 3)));
+        int count = Mathf.FloorToInt(FIELD_SIZE_X * FIELD_SIZE_Y - (blocks.Count + players.Count * (FIELD_CELL_SIZE * 3)));
         int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
 
         var brickData = Database.instance.bricks.First();
@@ -112,7 +118,7 @@ public class QuadricGameManager : GameManager
             if (cell != CellType.Empty)
                 continue;
 
-            if (players.Any(n => Vector2.Distance(n.pos, ground.pos) < Constants.FIELD_CELL_SIZE * 2))
+            if (players.Any(n => Vector2.Distance(n.pos, ground.pos) < FIELD_CELL_SIZE * 2))
                 continue;
 
             bricks.Add(new Brick(brickData, ground.coords, ground.pos));
@@ -184,32 +190,32 @@ public class QuadricGameManager : GameManager
         //Works for spheres
         foreach (var block in blocks)
         {
-            if (Vector3.Distance(block.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
+            if (Vector3.Distance(block.pos, nextPos) < MOVE_COLLISION_DIST)
             {
-                nextPos = block.pos + (nextPos - block.pos).normalized * Constants.MOVE_COLLISION_DIST;
+                nextPos = block.pos + (nextPos - block.pos).normalized * MOVE_COLLISION_DIST;
             }
         }
 
         foreach (var brick in bricks)
         {
-            if (Vector3.Distance(brick.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
+            if (Vector3.Distance(brick.pos, nextPos) < MOVE_COLLISION_DIST)
             {
-                nextPos = brick.pos + (nextPos - brick.pos).normalized * Constants.MOVE_COLLISION_DIST;
+                nextPos = brick.pos + (nextPos - brick.pos).normalized * MOVE_COLLISION_DIST;
             }
         }
 
         foreach (var bomb in bombs)
         {
-            if (Vector3.Distance(bomb.pos, nextPos) < Constants.MOVE_COLLISION_DIST)
+            if (Vector3.Distance(bomb.pos, nextPos) < MOVE_COLLISION_DIST)
             {
-                if (Vector3.Distance(bomb.pos, player.pos) <= Constants.MOVE_ON_BOMB_THRESHOLD)
+                if (Vector3.Distance(bomb.pos, player.pos) <= MOVE_ON_BOMB_THRESHOLD)
                     continue;
 
-                nextPos = bomb.pos + (nextPos - bomb.pos).normalized * Constants.MOVE_COLLISION_DIST;
+                nextPos = bomb.pos + (nextPos - bomb.pos).normalized * MOVE_COLLISION_DIST;
             }
         }
 
-        var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < Constants.PICK_UP_DIST);
+        var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < PICK_UP_DIST);
         for (int i = 0; i < powers.Count; i++)
         {
             player.PickUpPowerUp(powers[i].data.type);
@@ -317,7 +323,7 @@ public class QuadricGameManager : GameManager
         if (bombs.Any(n => n.coords.Equals(ground.coords)))
             return CellType.Bomb;
 
-        if (players.Any(n => Vector2.Distance(n.pos, ground.pos) < Constants.EXPLOSION_AFFECT_DIST))
+        if (players.Any(n => Vector2.Distance(n.pos, ground.pos) < EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
         if (blocks.Any(n => n.coords.Equals(ground.coords)))
@@ -351,7 +357,7 @@ public class QuadricGameManager : GameManager
                 return true;
 
             case CellType.Player:
-                var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < Constants.EXPLOSION_AFFECT_DIST);
+                var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < EXPLOSION_AFFECT_DIST);
                 players.Remove(player);
                 onDeathPlayer?.Invoke(player);
                 onExplosion?.Invoke(ExplosionType.Basic, ground.coords);

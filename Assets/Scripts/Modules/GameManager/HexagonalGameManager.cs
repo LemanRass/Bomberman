@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class HexagonalGameManager : GameManager
 {
-    public const int maxSize = 11;
-    public const int minSize = 6;
+    public const int maxSize = 17;
+    public const int minSize = 10;
 
     public const float verticalOffset = 0.78f;
     public const float horizontalOffset = 1.0f;
@@ -179,7 +179,13 @@ public class HexagonalGameManager : GameManager
 
     protected override void InitCamera()
     {
+        int rowsCount = grounds.Length;
+        Debug.Log($"Rows: {rowsCount}");
 
+
+
+        //float currentAspect = (float)Screen.width / (float)Screen.height;
+        //Camera.main.orthographicSize = 1920 / currentAspect / (rowsCount / 2);
     }
 
     #endregion
