@@ -60,7 +60,7 @@ public class QuadricGameManager : GameManager
     {
         blocks = new List<Block>();
 
-        var blockData = Database.instance.blocks.Last();
+        var blockData = Database.instance.blocks.First();
 
         for (int y = 0; y < FIELD_SIZE_Y; y++)
         {
@@ -245,7 +245,7 @@ public class QuadricGameManager : GameManager
             return;
         }
 
-        var bomb = new Bomb(dbBomb, owner, pos.ToRoundInt(), pos.ToRoundInt()); //TODO: Get the nearest cell for bomb
+        var bomb = new Bomb(dbBomb, owner, pos.ToRoundInt(), pos.ToRoundInt());
         bombs.Add(bomb);
         onBombSpawned?.Invoke(bomb);
     }
@@ -261,42 +261,38 @@ public class QuadricGameManager : GameManager
         onBombRemoved?.Invoke(bomb);
 
 
-        var ground = grounds.ToList().Find(n => n.coords.Equals(bomb.coords));
+        var ground = grounds[bomb.coords.x][bomb.coords.y];
 
         //Center
-        onExplosion?.Invoke(ExplosionType.Basic, bomb.coords);
+        onExplosion?.Invoke(ExplosionType.Basic, bomb.pos);
         HandleDestruction(ground);
 
 
         //Left
-        for (int x = bomb.coords.x - 1; x > bomb.coords.x - bomb.power; x--)
+        for (int x = bomb.coords.x - 1; x > bomb.coords.x - (bomb.power + 1); x--)
         {
-            var coords = new Vector2Int(x, bomb.coords.y);
-            if (HandleDestruction(ground))
+            if (HandleDestruction(grounds[x][bomb.coords.y]))
                 break;
         }
 
         //Right
-        for (int x = bomb.coords.x + 1; x < bomb.coords.x + bomb.power; x++)
+        for (int x = bomb.coords.x + 1; x < bomb.coords.x + (bomb.power + 1); x++)
         {
-            var coords = new Vector2Int(x, bomb.coords.y);
-            if (HandleDestruction(ground))
+            if (HandleDestruction(grounds[x][bomb.coords.y]))
                 break;
         }
 
         //Top
-        for (int y = bomb.coords.y + 1; y < bomb.coords.y + bomb.power; y++)
+        for (int y = bomb.coords.y + 1; y < bomb.coords.y + (bomb.power + 1); y++)
         {
-            var coords = new Vector2Int(bomb.coords.x, y);
-            if (HandleDestruction(ground))
+            if (HandleDestruction(grounds[bomb.coords.x][y]))
                 break;
         }
 
         //Bot
-        for (int y = bomb.coords.y - 1; y > bomb.coords.y - bomb.power; y--)
+        for (int y = bomb.coords.y - 1; y > bomb.coords.y - (bomb.power + 1); y--)
         {
-            var coords = new Vector2Int(bomb.coords.x, y);
-            if (HandleDestruction(ground))
+            if (HandleDestruction(grounds[bomb.coords.x][y]))
                 break;
         }
     }
@@ -339,6 +335,7 @@ public class QuadricGameManager : GameManager
     public override bool HandleDestruction(Ground ground)
     {
         var type = GetGroundType(ground);
+        Debug.Log($"Type: {type}");
 
         switch (type)
         {
