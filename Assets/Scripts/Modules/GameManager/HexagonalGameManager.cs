@@ -212,8 +212,8 @@ public class HexagonalGameManager : GameManager
         //{
         //    return;
         //}
-
-        var bomb = new Bomb(dbBomb, owner, pos.ToRoundInt(), pos); //TODO: Get the nearest cell for bomb
+        var nearest = FindNearestGround(pos);
+        var bomb = new Bomb(dbBomb, owner, pos.ToRoundInt(), nearest.First().pos); //TODO: Get the nearest cell for bomb
         bombs.Add(bomb);
         onBombSpawned?.Invoke(bomb);
     }
@@ -227,6 +227,48 @@ public class HexagonalGameManager : GameManager
     public override void ExplodeBomb(Bomb bomb)
     {
         RemoveBomb(bomb);
+
+        //Center
+        //onExplosion?.Invoke(ExplosionType.Basic, bomb.pos);
+        //HandleDestruction(bomb.coords);
+
+        var results = findAllGroundsInRange(bomb.pos, 1.0f);
+        foreach(var result in results)
+        {
+            onExplosion?.Invoke(ExplosionType.Basic, result.pos);
+        }
+
+        //Left
+        /*for (int x = bomb.coords.x - 1; x > bomb.coords.x - bomb.power; x--)
+        {
+            var coords = new Vector2Int(x, bomb.coords.y);
+            if (HandleDestruction(coords))
+                break;
+        }
+
+        //Right
+        for (int x = bomb.coords.x + 1; x < bomb.coords.x + bomb.power; x++)
+        {
+            var coords = new Vector2Int(x, bomb.coords.y);
+            if (HandleDestruction(coords))
+                break;
+        }
+
+        //Top
+        for (int y = bomb.coords.y + 1; y < bomb.coords.y + bomb.power; y++)
+        {
+            var coords = new Vector2Int(bomb.coords.x, y);
+            if (HandleDestruction(coords))
+                break;
+        }
+
+        //Bot
+        for (int y = bomb.coords.y - 1; y > bomb.coords.y - bomb.power; y--)
+        {
+            var coords = new Vector2Int(bomb.coords.x, y);
+            if (HandleDestruction(coords))
+                break;
+        }*/
     }
 
     #endregion
@@ -235,9 +277,20 @@ public class HexagonalGameManager : GameManager
 
     #region Tools
 
+    private List<Ground> findAllGroundsInRange(Vector2 pos, float distance)
+    {
+        return grounds.ToList().OrderBy(n => Vector2.Distance(n.pos, pos)).Where(n => Vector2.Distance(n.pos, pos) <= distance).ToList();
+    }
+
+    private List<Ground> FindNearestGround(Vector2 pos, int count = 1)
+    {
+        return grounds.ToList().OrderBy(n => Vector2.Distance(n.pos, pos)).Take(count).ToList();
+    }
+
     public override CellType GetCellType(Vector2Int coords)
     {
-        
+        if (blocks.Any(n => n.coords.Equals(coords)))
+            return CellType.Block;
 
         if (bricks.Any(n => n.coords.Equals(coords)))
             return CellType.Brick;
@@ -245,14 +298,55 @@ public class HexagonalGameManager : GameManager
         if (players.Any(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
-
-
         return CellType.Empty;
     }
 
     public override bool HandleDestruction(Vector2Int coords)
     {
-        return false;
+        var type = GetCellType(coords);
+
+        if (coords.x < 0 || coords.x >= grounds.Length)
+            return false;
+
+        if (coords.y < 0 || coords.y >= grounds[coords.x].Length)
+            return false;
+
+        var ground = grounds[coords.x][coords.y];
+
+        switch (type)
+        {
+            /*case CellType.Bomb:
+                var bomb = bombs.Find(n => n.pos.Equals(coords));
+                bomb.SetReady();
+                return true;
+
+            case CellType.Brick:
+                var brick = bricks.Find(n => n.pos.Equals(coords));
+                bricks.Remove(brick);
+                onBrickDestroyed?.Invoke(brick);
+                return true;
+
+            case CellType.Player:
+                var player = players.Find(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST);
+                players.Remove(player);
+                onDeathPlayer?.Invoke(player);
+                onExplosion?.Invoke(ExplosionType.Basic, coords);
+                return false;
+
+            case CellType.PowerUp:
+                var powerUp = powerUPs.Find(n => n.pos.Equals(coords));
+                powerUPs.Remove(powerUp);
+                onPowerUPDestroyed?.Invoke(powerUp);
+                return false;*/
+
+            case CellType.Empty:
+                onExplosion?.Invoke(ExplosionType.Basic, ground.pos);
+                return false;
+
+            default:
+
+                return true;
+        }
     }
 
     #endregion
