@@ -428,7 +428,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf7e93788f44e4f7da71701198911890, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BRICKS_DENSITY: 90
+  BRICKS_DENSITY: 100
   POWERUP_DENSITY: 50
 --- !u!4 &1554096836
 Transform:

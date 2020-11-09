@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class QuadricGameManager : GameManager
 {
-    public const int FIELD_SIZE_X = 7;
-    public const int FIELD_SIZE_Y = 7;
+    public const int FIELD_SIZE_X = 11;
+    public const int FIELD_SIZE_Y = 11;
 
     protected override void Update()
     {

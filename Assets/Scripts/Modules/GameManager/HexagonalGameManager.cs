@@ -114,9 +114,9 @@ public class HexagonalGameManager : GameManager
     {
         var brickData = Database.instance.bricks.Last();
 
-        int count = grounds.Count();
-        int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f));
-
+        int count = grounds.ToList().Count();
+        int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f) - blocks.Count - players.Count * 4);
+        Debug.Log($"Grounds count: {count} Bricks count: {bricksCount}");
         while (bricksCount > 0)
         {
             var randomRow = grounds.Random();
