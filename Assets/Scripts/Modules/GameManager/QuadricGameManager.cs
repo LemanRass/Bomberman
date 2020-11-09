@@ -104,17 +104,18 @@ public class QuadricGameManager : GameManager
             int x = Random.Range(0, FIELD_SIZE_X);
             int y = Random.Range(0, FIELD_SIZE_Y);
 
-            var pos = new Vector2(x, y);
-            var coords = new Vector2Int(x, y);
+            var ground = grounds[x][y];
+            //var pos = new Vector2(x, y);
+            //var coords = new Vector2Int(x, y);
 
-            var cell = GetCellType(coords);
+            var cell = GetGroundType(ground);
             if (cell != CellType.Empty)
                 continue;
 
-            if (players.Any(n => Vector2.Distance(n.pos, pos) < Constants.FIELD_CELL_SIZE * 2))
+            if (players.Any(n => Vector2.Distance(n.pos, ground.pos) < Constants.FIELD_CELL_SIZE * 2))
                 continue;
 
-            bricks.Add(new Brick(brickData, new Vector2Int(x, y), pos));
+            bricks.Add(new Brick(brickData, ground.coords, ground.pos));
             bricksCount--;
         }
     }
@@ -237,7 +238,8 @@ public class QuadricGameManager : GameManager
             return;
         }
 
-        var cellType = GetCellType(pos.ToRoundInt());
+        var ground = FindNearestGround(pos).First();
+        var cellType = GetGroundType(ground);
         if (cellType != CellType.Empty && cellType != CellType.Player)
         {
             return;
@@ -303,27 +305,32 @@ public class QuadricGameManager : GameManager
 
     #region Tools
 
-    public override CellType GetCellType(Vector2Int coords)
+    private List<Ground> FindNearestGround(Vector2 pos, int count = 1)
     {
-        if (coords.x < 0 || coords.x >= FIELD_SIZE_X ||
-            coords.y < 0 || coords.y >= FIELD_SIZE_Y)
+        return grounds.ToList().OrderBy(n => Vector2.Distance(n.pos, pos)).Take(count).ToList();
+    }
+
+    public override CellType GetGroundType(Ground ground)
+    {
+        if (ground.coords.x < 0 || ground.coords.x >= FIELD_SIZE_X ||
+            ground.coords.y < 0 || ground.coords.y >= FIELD_SIZE_Y)
         {
             return CellType.Outside;
         }
 
-        if (bombs.Any(n => n.coords.Equals(coords)))
+        if (bombs.Any(n => n.coords.Equals(ground.coords)))
             return CellType.Bomb;
 
-        if (players.Any(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST))
+        if (players.Any(n => Vector2.Distance(n.pos, ground.pos) < Constants.EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
-        if (blocks.Any(n => n.coords.Equals(coords)))
+        if (blocks.Any(n => n.coords.Equals(ground.coords)))
             return CellType.Block;
 
-        if (bricks.Any(n => n.coords.Equals(coords)))
+        if (bricks.Any(n => n.coords.Equals(ground.coords)))
             return CellType.Brick;
 
-        if (powerUPs.Any(n => n.coords.Equals(coords)))
+        if (powerUPs.Any(n => n.coords.Equals(ground.coords)))
             return CellType.PowerUp;
 
         return CellType.Empty;
@@ -331,7 +338,7 @@ public class QuadricGameManager : GameManager
 
     public override bool HandleDestruction(Ground ground)
     {
-        var type = GetCellType(ground.coords);
+        var type = GetGroundType(ground);
 
         switch (type)
         {

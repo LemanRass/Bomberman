@@ -77,7 +77,7 @@ public abstract class GameManager : MonoBehaviour
 
     #region Tools
 
-    public abstract CellType GetCellType(Vector2Int coords);
+    public abstract CellType GetGroundType(Ground ground);
 
     public abstract bool HandleDestruction(Ground ground);
 

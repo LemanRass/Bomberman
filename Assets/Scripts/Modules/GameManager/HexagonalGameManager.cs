@@ -13,6 +13,7 @@ public class HexagonalGameManager : GameManager
 
     public const float MOVE_COLLISION_DIST = 0.8f;
     public const float MOVE_ON_BOMB_THRESHOLD = 0.78f;
+    public const float EXPLOSION_AFFECT_DIST = 0.6f;
 
     protected override void Update()
     {
@@ -82,12 +83,6 @@ public class HexagonalGameManager : GameManager
             }
 
             oy -= verticalOffset;
-            //return;
-        }
-
-        for(int i = 0; i < grounds.Length; i++)
-        {
-            Debug.Log($"{grounds[i].Length}");
         }
     }
 
@@ -127,7 +122,7 @@ public class HexagonalGameManager : GameManager
             var randomRow = grounds.Random();
             var ground = randomRow.Random();
 
-            var cell = GetCellType(ground.coords);
+            var cell = GetGroundType(ground);
             if (cell != CellType.Empty)
                 continue;
 
@@ -163,7 +158,10 @@ public class HexagonalGameManager : GameManager
         bombs = new List<Bomb>();
     }
 
-    protected override void InitCamera() { }
+    protected override void InitCamera()
+    {
+
+    }
 
     #endregion
 
@@ -207,7 +205,11 @@ public class HexagonalGameManager : GameManager
         onMovePlayer?.Invoke(player);
     }
 
-    public override void DeathPlayer(Player player) { }
+    public override void DeathPlayer(Player player)
+    {
+        players.Remove(player);
+        onDeathPlayer?.Invoke(player);
+    }
 
     public override void SpawnBomb(DBBomb dbBomb, Player owner, Vector2 pos)
     {
@@ -219,7 +221,7 @@ public class HexagonalGameManager : GameManager
 
         var ground = FindNearestGround(pos).First();
 
-        var cellType = GetCellType(ground.coords);
+        var cellType = GetGroundType(ground);
         if (cellType == CellType.Empty || cellType == CellType.Player)
         {
             var bomb = new Bomb(dbBomb, owner, ground.coords, ground.pos);
@@ -264,18 +266,18 @@ public class HexagonalGameManager : GameManager
         return grounds.ToList().OrderBy(n => Vector2.Distance(n.pos, pos)).Take(count).ToList();
     }
 
-    public override CellType GetCellType(Vector2Int coords)
+    public override CellType GetGroundType(Ground ground)
     {
-        if (blocks.Any(n => n.coords.Equals(coords)))
+        if (blocks.Any(n => n.coords.Equals(ground.coords)))
             return CellType.Block;
 
-        if (bricks.Any(n => n.coords.Equals(coords)))
+        if (bricks.Any(n => n.coords.Equals(ground.coords)))
             return CellType.Brick;
 
-        if (players.Any(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST))
+        if (players.Any(n => Vector2.Distance(n.pos, ground.pos) < EXPLOSION_AFFECT_DIST))
             return CellType.Player;
 
-        if (bombs.Any(n => n.coords.Equals(coords)))
+        if (bombs.Any(n => n.coords.Equals(ground.coords)))
             return CellType.Bomb;
 
 
@@ -284,7 +286,9 @@ public class HexagonalGameManager : GameManager
 
     public override bool HandleDestruction(Ground ground)
     {
-        var type = GetCellType(ground.coords);
+        var type = GetGroundType(ground);
+        Debug.Log($"Type: {type}");
+
 
         switch (type)
         {
@@ -303,14 +307,14 @@ public class HexagonalGameManager : GameManager
                 onBrickDestroyed?.Invoke(brick);
                 return true;
 
-            /*case CellType.Player:
-                var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < Constants.EXPLOSION_AFFECT_DIST);
+            case CellType.Player:
+                var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < EXPLOSION_AFFECT_DIST);
                 players.Remove(player);
                 onDeathPlayer?.Invoke(player);
                 onExplosion?.Invoke(ExplosionType.Basic, ground.pos);
                 return false;
 
-            case CellType.PowerUp:
+            /*case CellType.PowerUp:
                 var powerUp = powerUPs.Find(n => n.pos.Equals(coords));
                 powerUPs.Remove(powerUp);
                 onPowerUPDestroyed?.Invoke(powerUp);
