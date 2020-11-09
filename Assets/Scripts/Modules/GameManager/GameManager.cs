@@ -79,7 +79,7 @@ public abstract class GameManager : MonoBehaviour
 
     public abstract CellType GetCellType(Vector2Int coords);
 
-    public abstract bool HandleDestruction(Vector2Int coords);
+    public abstract bool HandleDestruction(Ground ground);
 
     #endregion
 }

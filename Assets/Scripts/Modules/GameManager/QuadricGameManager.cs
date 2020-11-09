@@ -259,16 +259,18 @@ public class QuadricGameManager : GameManager
         onBombRemoved?.Invoke(bomb);
 
 
+        var ground = grounds.ToList().Find(n => n.coords.Equals(bomb.coords));
+
         //Center
         onExplosion?.Invoke(ExplosionType.Basic, bomb.coords);
-        HandleDestruction(bomb.coords);
+        HandleDestruction(ground);
 
 
         //Left
         for (int x = bomb.coords.x - 1; x > bomb.coords.x - bomb.power; x--)
         {
             var coords = new Vector2Int(x, bomb.coords.y);
-            if (HandleDestruction(coords))
+            if (HandleDestruction(ground))
                 break;
         }
 
@@ -276,7 +278,7 @@ public class QuadricGameManager : GameManager
         for (int x = bomb.coords.x + 1; x < bomb.coords.x + bomb.power; x++)
         {
             var coords = new Vector2Int(x, bomb.coords.y);
-            if (HandleDestruction(coords))
+            if (HandleDestruction(ground))
                 break;
         }
 
@@ -284,7 +286,7 @@ public class QuadricGameManager : GameManager
         for (int y = bomb.coords.y + 1; y < bomb.coords.y + bomb.power; y++)
         {
             var coords = new Vector2Int(bomb.coords.x, y);
-            if (HandleDestruction(coords))
+            if (HandleDestruction(ground))
                 break;
         }
 
@@ -292,7 +294,7 @@ public class QuadricGameManager : GameManager
         for (int y = bomb.coords.y - 1; y > bomb.coords.y - bomb.power; y--)
         {
             var coords = new Vector2Int(bomb.coords.x, y);
-            if (HandleDestruction(coords))
+            if (HandleDestruction(ground))
                 break;
         }
     }
@@ -327,38 +329,38 @@ public class QuadricGameManager : GameManager
         return CellType.Empty;
     }
 
-    public override bool HandleDestruction(Vector2Int coords)
+    public override bool HandleDestruction(Ground ground)
     {
-        var type = GetCellType(coords);
+        var type = GetCellType(ground.coords);
 
         switch (type)
         {
             case CellType.Bomb:
-                var bomb = bombs.Find(n => n.pos.Equals(coords));
+                var bomb = bombs.Find(n => n.coords.Equals(ground.coords));
                 bomb.SetReady();
                 return true;
 
             case CellType.Brick:
-                var brick = bricks.Find(n => n.pos.Equals(coords));
+                var brick = bricks.Find(n => n.coords.Equals(ground.coords));
                 bricks.Remove(brick);
                 onBrickDestroyed?.Invoke(brick);
                 return true;
 
             case CellType.Player:
-                var player = players.Find(n => Vector2.Distance(n.pos, coords) < Constants.EXPLOSION_AFFECT_DIST);
+                var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < Constants.EXPLOSION_AFFECT_DIST);
                 players.Remove(player);
                 onDeathPlayer?.Invoke(player);
-                onExplosion?.Invoke(ExplosionType.Basic, coords);
+                onExplosion?.Invoke(ExplosionType.Basic, ground.coords);
                 return false;
 
             case CellType.PowerUp:
-                var powerUp = powerUPs.Find(n => n.pos.Equals(coords));
+                var powerUp = powerUPs.Find(n => n.pos.Equals(ground.coords));
                 powerUPs.Remove(powerUp);
                 onPowerUPDestroyed?.Invoke(powerUp);
                 return false;
 
             case CellType.Empty:
-                onExplosion?.Invoke(ExplosionType.Basic, coords);
+                onExplosion?.Invoke(ExplosionType.Basic, ground.coords);
                 return false;
 
             default:

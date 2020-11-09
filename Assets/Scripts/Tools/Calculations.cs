@@ -17,7 +17,7 @@
 
     public static int CalcBombExplosionPower(Player player)
     {
-        int defaultPower = 2;
+        int defaultPower = 1;
 
         return defaultPower + player.powerUps.Count(PowerUPType.EXPLOSION_SIZE);
     }
