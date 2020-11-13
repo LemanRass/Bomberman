@@ -175,7 +175,7 @@ public class QuadricGameManager : GameManager
         float z = FIELD_SIZE_Y / 2;
         float y = Mathf.Abs(x) + Mathf.Abs(z);
 
-        Camera.main.transform.position = new Vector3(x, y, z);
+        Camera.main.transform.position = new Vector3(-x, y, z);
     }
 
     #endregion
@@ -187,7 +187,7 @@ public class QuadricGameManager : GameManager
         var player = players.Find(n => n.id.Equals(id));
         var nextPos = player.pos + (dir * player.moveSpeed * Time.deltaTime);
 
-        //Works for spheres
+        
         foreach (var block in blocks)
         {
             if (Vector3.Distance(block.pos, nextPos) < MOVE_COLLISION_DIST)
@@ -216,17 +216,23 @@ public class QuadricGameManager : GameManager
         }
 
         var powers = powerUPs.FindAll(n => Vector3.Distance(n.pos, nextPos) < PICK_UP_DIST);
-        for (int i = 0; i < powers.Count; i++)
+        foreach (var power in powers)
         {
-            player.PickUpPowerUp(powers[i].data.type);
-            powerUPs.Remove(powers[i]);
+            if (Vector3.Distance(power.pos, nextPos) < PICK_UP_DIST)
+            {
+                //Not available yet
+                if (bricks.Any(n => n.coords.Equals(power.coords)))
+                    continue;
 
-            Debug.Log($"Pick up {powers[i].data.type}");
-            onPowerUPPicked?.Invoke(powers[i]);
+                player.PickUpPowerUp(power.data.type);
+                powerUPs.Remove(power);
+
+                Debug.Log($"Picked up {power.data.type}");
+                onPowerUPPicked?.Invoke(power);
+            }
         }
 
         player.pos = nextPos;
-        //player.coords = nextPos.ToRoundInt();
         onMovePlayer?.Invoke(player);
     }
 
@@ -245,15 +251,14 @@ public class QuadricGameManager : GameManager
         }
 
         var ground = FindNearestGround(pos).First();
-        var cellType = GetGroundType(ground);
-        if (cellType != CellType.Empty && cellType != CellType.Player)
-        {
-            return;
-        }
 
-        var bomb = new Bomb(dbBomb, owner, pos.ToRoundInt(), pos.ToRoundInt());
-        bombs.Add(bomb);
-        onBombSpawned?.Invoke(bomb);
+        var cellType = GetGroundType(ground);
+        if (cellType == CellType.Empty || cellType == CellType.Player)
+        {
+            var bomb = new Bomb(dbBomb, owner, ground.coords, ground.pos);
+            bombs.Add(bomb);
+            onBombSpawned?.Invoke(bomb);
+        }
     }
 
     public override void RemoveBomb(Bomb bomb)
@@ -341,40 +346,64 @@ public class QuadricGameManager : GameManager
     public override bool HandleDestruction(Ground ground)
     {
         var type = GetGroundType(ground);
-        Debug.Log($"Type: {type}");
 
         switch (type)
         {
+            case CellType.Block:
+                {
+
+                }
+                return false;
+
             case CellType.Bomb:
-                var bomb = bombs.Find(n => n.coords.Equals(ground.coords));
-                bomb.SetReady();
+                {
+                    var bomb = bombs.Find(n => n.coords.Equals(ground.coords));
+                    bomb.SetReady();
+                }
                 return true;
 
             case CellType.Brick:
-                var brick = bricks.Find(n => n.coords.Equals(ground.coords));
-                bricks.Remove(brick);
-                onBrickDestroyed?.Invoke(brick);
+                {
+                    var brick = bricks.Find(n => n.coords.Equals(ground.coords));
+                    bricks.Remove(brick);
+                    onBrickDestroyed?.Invoke(brick);
+
+                    //Show powerup if exists
+                    var powerUp = powerUPs.Find(n => n.coords.Equals(ground.coords));
+                    if (powerUp != null)
+                    {
+                        onPowerUpSpawned?.Invoke(powerUp);
+                    }
+                }
                 return true;
 
             case CellType.Player:
-                var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < EXPLOSION_AFFECT_DIST);
-                players.Remove(player);
-                onDeathPlayer?.Invoke(player);
-                onExplosion?.Invoke(ExplosionType.Basic, ground.coords);
+                {
+                    var player = players.Find(n => Vector2.Distance(n.pos, ground.pos) < EXPLOSION_AFFECT_DIST);
+                    players.Remove(player);
+                    onDeathPlayer?.Invoke(player);
+                    onExplosion?.Invoke(ExplosionType.Basic, ground.coords);
+                }
                 return false;
 
             case CellType.PowerUp:
-                var powerUp = powerUPs.Find(n => n.pos.Equals(ground.coords));
-                powerUPs.Remove(powerUp);
-                onPowerUPDestroyed?.Invoke(powerUp);
+                {
+                    var powerUp = powerUPs.Find(n => n.pos.Equals(ground.coords));
+                    powerUPs.Remove(powerUp);
+                    onPowerUPDestroyed?.Invoke(powerUp);
+                }
                 return false;
 
             case CellType.Empty:
-                onExplosion?.Invoke(ExplosionType.Basic, ground.coords);
+                {
+                    onExplosion?.Invoke(ExplosionType.Basic, ground.coords);
+                }
                 return false;
 
             default:
+                {
 
+                }
                 return true;
         }
     }

@@ -116,7 +116,10 @@ public class HexagonalGameManager : GameManager
         var brickData = Database.instance.bricks.Last();
 
         int count = grounds.ToList().Count();
-        int bricksCount = Mathf.RoundToInt(count * (BRICKS_DENSITY / 100.0f) - blocks.Count - players.Count * 4);
+        int bricksCount = Mathf.RoundToInt((count - blocks.Count - players.Count * 4) * (BRICKS_DENSITY / 100.0f));
+        Debug.Log($"Grounds count: {count}\nBlocks count: {blocks.Count}\nPlayers count: {players.Count}\nBricks count: {bricksCount}");
+
+
         while (bricksCount > 0)
         {
             var randomRow = grounds.Random();
@@ -181,11 +184,6 @@ public class HexagonalGameManager : GameManager
     {
         int rowsCount = grounds.Length;
         Debug.Log($"Rows: {rowsCount}");
-
-
-
-        //float currentAspect = (float)Screen.width / (float)Screen.height;
-        //Camera.main.orthographicSize = 1920 / currentAspect / (rowsCount / 2);
     }
 
     #endregion
